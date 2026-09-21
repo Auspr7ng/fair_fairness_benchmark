@@ -1,4 +1,4 @@
-"""Run a partial FFB ResNet-18 or ResNet-20 ERM baseline on CelebA Attractive/Gender.
+"""Run a partial FFB ResNet-18 or ResNet-20 ERM/DiffDP experiment on CelebA.
 
 The expected input is datasets/celeba/raw/celeba.csv from datasets/readme.md.
 By default, a seeded reservoir sample of 20,000 rows keeps the first run modest.
@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CSV = ROOT / "datasets" / "celeba" / "raw" / "celeba.csv"
 
 
@@ -52,11 +52,13 @@ def sample_rows(csv_path: Path, max_samples: int, seed: int):
     return rows, seen + 1
 
 
-def main(default_architecture: str = "resnet18") -> int:
+def main(default_architecture: str = "resnet18", default_method: str = "erm") -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, default=DEFAULT_CSV)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--architecture", choices=("resnet18", "resnet20"), default=default_architecture)
+    parser.add_argument("--method", choices=("erm", "diffdp"), default=default_method)
+    parser.add_argument("--lam", type=float, default=1.0, help="DiffDP fairness weight; repository default is 1.0")
     parser.add_argument("--max-samples", type=int, default=20000)
     parser.add_argument("--seed", type=int, default=1314)
     parser.add_argument("--steps", type=int, default=150)
@@ -68,12 +70,15 @@ def main(default_architecture: str = "resnet18") -> int:
     args = parser.parse_args()
     if args.max_samples < 0:
         parser.error("--max-samples must be nonnegative")
+    if args.lam < 0:
+        parser.error("--lam must be nonnegative")
     if args.weights is None:
         args.weights = "imagenet" if args.architecture == "resnet18" else "random"
     if args.architecture == "resnet20" and args.weights != "random":
         parser.error("resnet_20.py has no ImageNet weights; use --weights random")
     if args.output is None:
-        args.output = ROOT / "results" / f"{args.architecture}_celeba_attractive_gender.json"
+        suffix = "" if args.method == "erm" else f"_diffdp_lam{args.lam:g}"
+        args.output = ROOT / "results" / f"{args.architecture}_celeba_attractive_gender{suffix}.json"
 
     readiness = preflight(args.data)
     if args.check:
@@ -92,6 +97,7 @@ def main(default_architecture: str = "resnet18") -> int:
 
     sys.path.insert(0, str(ROOT / "src"))
     from metrics import metric_evaluation
+    from loss import DiffDP
 
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -144,8 +150,11 @@ def main(default_architecture: str = "resnet18") -> int:
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)
     criterion = torch.nn.BCELoss()
+    fair_criterion = DiffDP() if args.method == "diffdp" else None
     batches = iter(train_loader)
     last_loss = None
+    last_clf_loss = None
+    last_fair_loss = None
     for step in range(args.steps):
         try:
             x, a = next(batches)
@@ -155,13 +164,24 @@ def main(default_architecture: str = "resnet18") -> int:
         model.train()
         optimizer.zero_grad(set_to_none=True)
         pred = predict(x.to(device))
-        loss = criterion(pred, a[:, 2:3].to(device))
+        clf_loss = criterion(pred, a[:, 2:3].to(device))
+        if fair_criterion is None:
+            fair_loss = None
+            loss = clf_loss
+        else:
+            fair_loss = fair_criterion(pred, a[:, 3:4].to(device))
+            if not torch.isfinite(fair_loss):
+                raise ValueError("DiffDP loss is non-finite; check both sensitive groups in the batch")
+            loss = clf_loss + args.lam * fair_loss
         loss.backward()
         optimizer.step()
         scheduler.step()
         last_loss = float(loss.item())
+        last_clf_loss = float(clf_loss.item())
+        last_fair_loss = None if fair_loss is None else float(fair_loss.item())
         if (step + 1) % 25 == 0 or step + 1 == args.steps:
-            print(f"step={step+1} loss={last_loss:.5f} lr={scheduler.get_last_lr()[0]:.6g}", flush=True)
+            print(f"step={step+1} loss={last_loss:.5f} clf={last_clf_loss:.5f} "
+                  f"fair={last_fair_loss} lr={scheduler.get_last_lr()[0]:.6g}", flush=True)
 
     def evaluate(data_loader, prefix):
         probs, targets, groups = [], [], []
@@ -179,7 +199,9 @@ def main(default_architecture: str = "resnet18") -> int:
     checkpoint = args.output.with_suffix(".pt")
     torch.save(model.state_dict(), checkpoint)
     result = {
-        "status": "completed", "model": f"{args.architecture} ERM", "dataset": "CelebA-A",
+        "status": "completed", "model": f"{args.architecture} {args.method.upper()}",
+        "method": args.method, "fairness_weight": args.lam if args.method == "diffdp" else None,
+        "dataset": "CelebA-A",
         "architecture_source": "resnet_20.py" if args.architecture == "resnet20" else "src/networks.py",
         "target": "Attractive", "sensitive_attribute": "Male", "seed": args.seed,
         "total_csv_rows": total_rows, "sampled_rows": len(rows),
@@ -188,7 +210,8 @@ def main(default_architecture: str = "resnet18") -> int:
         "torch_version": torch.__version__, "numpy_version": np.__version__,
         "checkpoint": str(checkpoint),
         "split_sizes": {"train": len(train_idx), "validation": len(val_idx), "test": len(test_idx)},
-        "last_train_loss": last_loss, "validation": evaluate(val_loader, "val"),
+        "last_train_loss": last_loss, "last_classifier_loss": last_clf_loss,
+        "last_fairness_loss": last_fair_loss, "validation": evaluate(val_loader, "val"),
         "test": evaluate(test_loader, "test"),
     }
     args.output.write_text(json.dumps(result, indent=2), encoding="utf-8")
