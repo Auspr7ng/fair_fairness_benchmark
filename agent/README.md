@@ -17,3 +17,12 @@ ollama pull qwen3:4b
 python3 -m venv .venv-agent
 source .venv-agent/bin/activate
 python -m pip install -r agent/requirements.txt
+```
+
+## Run
+
+Make sure Ollama is open, then run:
+
+```bash
+python agent/basic_agent.py
+```
