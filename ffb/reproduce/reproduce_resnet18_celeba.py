@@ -1,6 +1,6 @@
 """Run a partial FFB ResNet-18 or ResNet-20 ERM/DiffDP experiment on CelebA.
 
-The expected input is datasets/celeba/raw/celeba.csv from datasets/readme.md.
+The expected input is ffb/datasets/celeba/raw/celeba.csv; see ffb/datasets/readme.md.
 By default, a seeded reservoir sample of 20,000 rows keeps the first run modest.
 Use --max-samples 0 to use every row when sufficient memory is available.
 """

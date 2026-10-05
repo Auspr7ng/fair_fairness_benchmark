@@ -3,7 +3,9 @@
 </p>
 <br><br>
 
-## Fair Fairness Benchmark Clone + tools assignment
+## Fair Fairness Benchmark (FFB) reference documentation
+
+> This document is adapted from the original [FFB repository](https://github.com/ahxt/fair_fairness_benchmark). Its figures, experiment counts, and running logs are the original authors' published work, not our group's reproduction results. For our current progress and the reorganized layout, see the [project README](../README.md).
 
 ## Update:
 - [05/09/2024]: update processed Jiasaw datasets, refer to the [datasets/readme.md](./datasets/readme.md)
@@ -79,6 +81,8 @@ The statistics of the datasets are as the following:
 
 
 ## 4. How to Run
+The commands in this section assume you first run `cd ffb` from the repository root.
+
 ### 4.1 Setup
 To install the Fair Fairness Benchmark, simply clone this repository and install the required dependencies by running the following command:
 
@@ -86,10 +90,12 @@ To install the Fair Fairness Benchmark, simply clone this repository and install
 pip install -r requirements.txt
 ```
 ### 4.2 Run Example
+Run from `ffb/src/` so the scripts' `../datasets/` paths resolve correctly:
+
 ```
-python -u ./ffb_tabular_erm.py --dataset acs --model erm --sensitive_attr age --target_attr income --batch_size 32 --seed 89793 --log_freq 1 --num_training_steps 150
-python -u ./ffb_tabular_diffdp.py --dataset acs --model diffdp --sensitive_attr race --target_attr income --batch_size 4096 --lam 1.4 --seed 89793 --log_freq 1 --num_training_steps 150
-wait;
+cd src
+python -u ffb_tabular_erm.py --dataset acs --model erm --sensitive_attr age --target_attr income --batch_size 32 --seed 89793 --log_freq 1 --num_training_steps 150
+python -u ffb_tabular_diffdp.py --dataset acs --model diffdp --sensitive_attr race --target_attr income --batch_size 4096 --lam 1.4 --seed 89793 --log_freq 1 --num_training_steps 150
 ```
 
 ## 5. Step-by-Step Guideline for Running FFB
@@ -111,13 +117,13 @@ statsmodels==0.13.5
 cd path/to/your/directory
 
 # Clone the repository from GitHub
-git clone https://github.com/ahxt/fair_fairness_benchmark.git
+git clone https://github.com/Auspr7ng/fair_fairness_benchmark.git
 ```
 
 ### Step 3: Setting Up Conda Environment
 ```bash
 # Navigate to the cloned directory
-cd fair_fairness_benchmark
+cd fair_fairness_benchmark/ffb
 
 # Create a new conda environment
 conda create --name ffb_env python=3.8
@@ -144,11 +150,12 @@ wandb login
 Before running, ensure you've downloaded the necessary datasets as per the instructions in `datasets/readme.md`.
 
 ```bash
-# Run the first example
-python -u ./ffb_tabular_erm.py --dataset acs --model erm --sensitive_attr age --target_attr income --batch_size 32 --seed 89793 --log_freq 1 --num_training_steps 150
+# Run from ffb/src/ so ../datasets/ points to ffb/datasets/
+cd src
+python -u ffb_tabular_erm.py --dataset acs --model erm --sensitive_attr age --target_attr income --batch_size 32 --seed 89793 --log_freq 1 --num_training_steps 150
 
 # Run the second example
-python -u ./ffb_tabular_diffdp.py --dataset acs --model diffdp --sensitive_attr race --target_attr income --batch_size 4096 --lam 1.4 --seed 89793 --log_freq 1 --num_training_steps 150
+python -u ffb_tabular_diffdp.py --dataset acs --model diffdp --sensitive_attr race --target_attr income --batch_size 4096 --lam 1.4 --seed 89793 --log_freq 1 --num_training_steps 150
 ```
 
 ## 6. Running Logs

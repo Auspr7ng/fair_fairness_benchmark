@@ -5,14 +5,14 @@ from langchain_core.tools import tool
 from langchain_ollama import ChatOllama
 
 
-# Locate the main fair_fairness_benchmark repository folder. 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+# The reproduction scripts live with the FFB code, beside team/.
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 @tool
 def list_reproduction_scripts() -> str:
     """List the available Python reproduction scripts in the FFB repository."""
-    reproduce_folder = REPO_ROOT / "reproduce"
+    reproduce_folder = REPO_ROOT / "ffb" / "reproduce"
     scripts = sorted(file.name for file in reproduce_folder.glob("*.py"))
 
     print("\n[TOOL CALLED] list_reproduction_scripts")

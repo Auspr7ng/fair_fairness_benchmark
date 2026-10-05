@@ -7,7 +7,7 @@ metrics a research paper PDF reports. Output is deterministic.
 
 ```bash
 pip install -r requirements.txt        # runtime: pdfplumber (MIT)
-pip install -r requirements-dev.txt    # adds pytest, reportlab for tests
+pip install -r requirements-dev.txt    # optional test dependencies
 ```
 
 ## Usage
@@ -26,7 +26,7 @@ python -m eval_metrics paper.pdf --top-k 5     # one metric per line
 python -m eval_metrics paper.pdf --verbose     # + score and where it was found
 ```
 
-Run both from this directory (`eval_metrics_tool/`).
+Run both from `team/eval_metrics_tool/`.
 
 ## How it works
 
@@ -66,13 +66,13 @@ Patterns are regexes without word boundaries (added automatically):
 - `cs_patterns`: case-sensitive, for distinctive acronyms ("BLEU").
 - `context_patterns`: case-sensitive and context-gated, for short or ambiguous acronyms.
 
-Then add an alias test in `tests/test_matcher.py`.
+When adding tests, include an alias case for the new pattern. A test suite is
+not yet committed in this repository.
 
 ## Tests
 
-```bash
-python -m pytest
-```
+No automated tests are currently committed. The development requirements
+include `pytest` and `reportlab` for future tests.
 
 ## Known limitations
 
