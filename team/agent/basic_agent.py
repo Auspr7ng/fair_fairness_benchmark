@@ -2,6 +2,7 @@ from pathlib import Path
 
 from deepagents import create_deep_agent
 from langchain_core.tools import tool
+from team.insert_into_record_tool.langchain_tool import update_metric_record
 from langchain_ollama import ChatOllama
 
 
@@ -32,11 +33,13 @@ model = ChatOllama(
 # Give the agent its model, tool, and instructions.
 agent = create_deep_agent(
     model=model,
-    tools=[list_reproduction_scripts],
+    tools=[list_reproduction_scripts, update_metric_record],
     system_prompt=(
-        "You are an assistant for the Fair Fairness Benchmark repository. "
-        "When asked about available reproduction experiments, you must call "
-        "the list_reproduction_scripts tool before answering."
+    "You are an assistant for the Fair Fairness Benchmark repository. "
+    "Use list_reproduction_scripts to answer questions about reproduction scripts. "
+    "Use update_metric_record when explicitly asked to update a metric in "
+    "the active evaluation record. Never invent metric values or update "
+    "records without a user request."
     ),
 )
 
@@ -47,7 +50,7 @@ result = agent.invoke(
             {
                 "role": "user",
                 "content": (
-                    "Use the repository tool and tell me which reproduction "
+                   "Use the repository tool and tell me which reproduction "
                     "experiments are available."
                 ),
             }
