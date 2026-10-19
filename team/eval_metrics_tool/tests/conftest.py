@@ -18,6 +18,16 @@ class FakeLiteLLM:
         return SimpleNamespace(choices=[SimpleNamespace(message=msg)])
 
 
+@pytest.fixture(autouse=True)
+def no_dotenv(monkeypatch):
+    """Never read the developer's real .env during tests."""
+    from eval_metrics import llm
+    llm.load_env.cache_clear()
+    monkeypatch.setattr(llm, "find_env_file", lambda: None)
+    yield
+    llm.load_env.cache_clear()
+
+
 @pytest.fixture
 def fake_litellm(monkeypatch):
     fake = FakeLiteLLM()

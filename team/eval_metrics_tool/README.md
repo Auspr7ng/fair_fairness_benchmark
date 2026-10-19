@@ -10,7 +10,7 @@ back to a deterministic, rule-based dictionary ranking.
 ## Install
 
 ```bash
-pip install -r requirements.txt        # runtime: pdfplumber (MIT), litellm (MIT)
+pip install -r requirements.txt        # runtime: pdfplumber (MIT), litellm (MIT), python-dotenv (BSD)
 pip install -r requirements-dev.txt    # adds pytest, reportlab for tests
 ```
 
@@ -29,6 +29,21 @@ provider's usual environment variable.
 
 `--api-base` also defaults to `EVAL_METRICS_API_BASE`. You can pass `--api-key`,
 but environment variables keep keys out of your shell history.
+
+### Settings in a `.env` file
+
+All of these variables (`EVAL_METRICS_MODEL`, `EVAL_METRICS_API_BASE`, provider
+keys) can go in a `.env` file instead of your shell:
+
+```bash
+cp .env.example ../../.env     # repo root; already git-ignored
+```
+
+The tool loads the nearest `.env` found by walking up from the current
+directory, then from the package folder. Precedence, highest first: the
+`--model` / `--api-base` / `--api-key` flags (or Python arguments), then
+variables already set in your shell, then `.env`. Never commit `.env`; commit
+changes to `.env.example` instead.
 
 ## Usage
 

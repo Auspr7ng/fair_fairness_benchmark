@@ -4,14 +4,39 @@ The model is a LiteLLM model string, e.g. "ollama/qwen3:4b", "gpt-4o-mini",
 "anthropic/claude-haiku-5-5", "openrouter/...". API keys are read by LiteLLM
 from the provider's usual environment variable (OPENAI_API_KEY,
 ANTHROPIC_API_KEY, ...); local models such as Ollama need none.
+
+All of these can live in a .env file: the nearest one above the current
+directory (or above this package) is loaded once. Variables already set in the
+shell win over .env.
 """
 
 import json
 import os
 import re
+from functools import lru_cache
+from pathlib import Path
 
 MODEL_ENV = "EVAL_METRICS_MODEL"
 API_BASE_ENV = "EVAL_METRICS_API_BASE"
+
+
+def find_env_file() -> Path | None:
+    """Nearest .env walking up from the cwd, then from this package."""
+    for start in (Path.cwd(), Path(__file__).resolve().parent):
+        for d in (start, *start.parents):
+            if (d / ".env").is_file():
+                return d / ".env"
+    return None
+
+
+@lru_cache(maxsize=1)
+def load_env() -> Path | None:
+    """Load .env into os.environ (once, without overriding). Returns the file used."""
+    path = find_env_file()
+    if path is not None:
+        from dotenv import load_dotenv
+        load_dotenv(path, override=False)
+    return path
 
 SYSTEM_PROMPT = (
     "You read the Experiments section of an AI/ML research paper and identify "
@@ -28,6 +53,7 @@ class LLMError(Exception):
 
 
 def resolve_model(model: str | None) -> str | None:
+    load_env()
     return model or os.environ.get(MODEL_ENV) or None
 
 
@@ -60,6 +86,7 @@ def ask_llm(section: str, model: str, top_k: int = 5, api_base: str | None = Non
     except ImportError as exc:
         raise LLMError("litellm is not installed: pip install -r requirements.txt") from exc
     litellm.suppress_debug_info = True  # no "Give Feedback" banners on errors
+    load_env()  # API keys / EVAL_METRICS_API_BASE may come from .env
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": f"List at most {top_k} metrics.\n\nExperiments section:\n{section}"},
