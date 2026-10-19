@@ -10,6 +10,7 @@ This repository organizes the published [Fair Fairness Benchmark (FFB)](https://
 | CelebA reproduction | Four ResNet-18/ResNet-20 runners for ERM and DiffDP under [`ffb/reproduce/`](ffb/reproduce/) | Scripts and a dependency/data preflight are implemented. No completed run output is committed; training still needs the CelebA data and dependencies. |
 | PDF evaluation-metric extractor | [`team/eval_metrics_tool/`](team/eval_metrics_tool/) | Rule-based PDF text/table extraction, metric matching, and ranking are implemented. Scanned PDFs and some table layouts remain unsupported. |
 | Metric record initializer | [`team/initialize_metrics_record_tool/`](team/initialize_metrics_record_tool/) | Extracts reported values into a metric-to-value record. Ambiguous or missing values remain empty for review. |
+| Metric record updater | [`team/insert_into_record_tool/`](team/insert_into_record_tool/) | Validates updates to an initialized record and saves the selected record as JSON. |
 | Local repository agent | [`team/agent/`](team/agent/) | A basic Ollama/LangChain agent can list the available reproduction scripts. It is not yet an automated experiment runner. |
 
 ## Repository map
@@ -30,7 +31,8 @@ This repository organizes the published [Fair Fairness Benchmark (FFB)](https://
 └── team/                         Group-built supporting tools
     ├── agent/                    Local repository agent
     ├── eval_metrics_tool/        PDF evaluation-metric extractor
-    └── initialize_metrics_record_tool/  Paper-reported metric values
+    ├── initialize_metrics_record_tool/  Paper-reported metric values
+    └── insert_into_record_tool/         Validated metric record updates
 ```
 
 The code in `ffb/src/`, `ffb/benchmark/`, `ffb/datasets/`, `ffb/tutorial/`, and `ffb/img/` comes from the [upstream FFB project](https://github.com/ahxt/fair_fairness_benchmark). The `ffb/reproduce/` scripts and folders under `team/` are this group's additions. See the [FFB paper](https://arxiv.org/abs/2306.09468) for the benchmark's methods and published results.
@@ -82,6 +84,15 @@ python -m team.initialize_metrics_record_tool /path/to/FFB.pdf --metric Accuracy
 ```
 
 This returns JSON with one reported value per metric where the paper gives a clear value. Use `--metric` to choose names or `--row-label` to select a model row in a table. See the [tool README](team/initialize_metrics_record_tool/README.md) for the Python API and limitations.
+
+### Update a metric record
+
+```bash
+python -m team.initialize_metrics_record_tool paper.pdf --metric F1 --metric Accuracy > metrics.json
+python -m team.insert_into_record_tool metrics.json F1 0.90
+```
+
+The updater changes only an existing metric in the selected JSON record. See its [README](team/insert_into_record_tool/README.md) for the Python API and validation rules.
 
 ### Run the local agent
 

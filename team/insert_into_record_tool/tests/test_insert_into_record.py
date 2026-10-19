@@ -1,10 +1,12 @@
 
 import unittest
 import json
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
-from team.insert_into_record_tool.insert_into_record import MetricsRecord
+from team.insert_into_record_tool import MetricsRecord, update_record_file
 
 
 class TestMetricsRecord(unittest.TestCase):
@@ -126,11 +128,43 @@ class TestMetricsRecord(unittest.TestCase):
             )
 
             record = MetricsRecord(initialized)
+            path = Path(folder) / "metrics.json"
+            record.save_json(path)
+            updated = update_record_file(path, "F1", 0.90)
 
-            record.insert_into_record("F1", 0.90)
+            self.assertEqual(updated.record, {"F1": 0.90, "Accuracy": 92.0})
+            self.assertEqual(MetricsRecord.load_json(path).record, updated.record)
+            self.assertEqual(initialized, {"F1": 0.87, "Accuracy": 92.0})
 
-            self.assertEqual(record.record["F1"], 0.90)
-            self.assertEqual(record.record["Accuracy"], 92.0)
+    def test_failed_file_update_preserves_saved_record(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "metrics.json"
+            self.record.save_json(path)
+            original = path.read_bytes()
+
+            with self.assertRaises(KeyError):
+                update_record_file(path, "Unknown", 0.7)
+            with self.assertRaises(ValueError):
+                update_record_file(path, "F1", float("nan"))
+
+            self.assertEqual(path.read_bytes(), original)
+
+    def test_cli_selects_record_without_pdf_dependencies(self):
+        with tempfile.TemporaryDirectory() as folder:
+            selected = Path(folder) / "selected.json"
+            other = Path(folder) / "other.json"
+            self.record.save_json(selected)
+            self.record.save_json(other)
+
+            command = [sys.executable, "-S", "-m", "team.insert_into_record_tool",
+                       str(selected), "F1", "0.91"]
+            subprocess.run(command, cwd=Path(__file__).resolve().parents[3],
+                           check=True, capture_output=True, text=True)
+
+            self.assertEqual(MetricsRecord.load_json(selected).record,
+                             {"Accuracy": 92.0, "F1": 0.91})
+            self.assertEqual(MetricsRecord.load_json(other).record,
+                             {"Accuracy": 92.0, "F1": None})
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
-import json
-import math 
-from pathlib import Path
+"""Validate and update one metric in an initialized record."""
 
-from team.initialize_metrics_record_tool import insert_eval_metric
+import json
+import math
+from pathlib import Path
 
 
 class MetricsRecord:
@@ -37,8 +37,10 @@ class MetricsRecord:
         """Update an initialized metric with a validated value."""
         self._validate_metric(metric)
         self._validate_value(value)
-
-        return insert_eval_metric(self.record, metric, value)
+        if metric not in self.record:
+            raise KeyError(f"Metric {metric!r} is not initialized in the record")
+        self.record[metric] = value
+        return self.record
 
     def save_json(self, file_path: str, overwrite: bool = False):
         """Save the record without accidentally overwriting an existing file."""
@@ -59,3 +61,10 @@ class MetricsRecord:
 
         return cls(data)
 
+
+def update_record_file(file_path: str | Path, metric: str, value: float | int) -> MetricsRecord:
+    """Select a saved record, update one initialized metric, and persist it."""
+    record = MetricsRecord.load_json(file_path)
+    record.insert_into_record(metric, value)
+    record.save_json(file_path, overwrite=True)
+    return record

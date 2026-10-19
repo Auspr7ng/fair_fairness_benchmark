@@ -29,6 +29,18 @@ class TestLangChainTool(unittest.TestCase):
             "value": value
         })
 
+    def test_boolean_and_numeric_string_are_rejected(self):
+        MetricsRecord({"F1": None}).save_json(self.path)
+        original = self.path.read_bytes()
+        for value in (True, False, "0.87"):
+            with self.subTest(value=value):
+                self.assertIn("Error", self.invoke_update("F1", value))
+                self.assertEqual(self.path.read_bytes(), original)
+
+    def test_default_path_is_repository_root(self):
+        from team.insert_into_record_tool.langchain_tool import REPO_ROOT
+        self.assertEqual(REPO_ROOT, Path(__file__).resolve().parents[3])
+
     def test_successful_update(self):
         MetricsRecord({
             "Accuracy": 92.0,

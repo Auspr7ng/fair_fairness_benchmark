@@ -10,13 +10,8 @@ back to a deterministic, rule-based dictionary ranking.
 ## Install
 
 ```bash
-<<<<<<< HEAD:team/eval_metrics_tool/README.md
-pip install -r requirements.txt        # runtime: pdfplumber (MIT)
-pip install -r requirements-dev.txt    # optional test dependencies
-=======
 pip install -r requirements.txt        # runtime: pdfplumber (MIT), litellm (MIT)
 pip install -r requirements-dev.txt    # adds pytest, reportlab for tests
->>>>>>> 7ab761c (updated eval metric to use an llm on top of the pre-existing dictionary method | eval metrics now finds the experiments section and sends that to an llm of choice | updated readme):eval_metrics_tool/README.md
 ```
 
 ## Choosing a model

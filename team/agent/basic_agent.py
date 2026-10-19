@@ -1,13 +1,19 @@
+"""Run the local FFB agent with optional metric-record tools."""
+
+import argparse
+import sys
 from pathlib import Path
 
 from deepagents import create_deep_agent
 from langchain_core.tools import tool
-from team.insert_into_record_tool.langchain_tool import update_metric_record
 from langchain_ollama import ChatOllama
 
 
-# The reproduction scripts live with the FFB code, beside team/.
 REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from team.agent.record_tools import create_record_tools
 
 
 @tool
@@ -15,48 +21,45 @@ def list_reproduction_scripts() -> str:
     """List the available Python reproduction scripts in the FFB repository."""
     reproduce_folder = REPO_ROOT / "ffb" / "reproduce"
     scripts = sorted(file.name for file in reproduce_folder.glob("*.py"))
-
-    print("\n[TOOL CALLED] list_reproduction_scripts")
-
     if not scripts:
         return "No reproduction scripts were found."
-
     return "\n".join(scripts)
 
 
-# Connects the agent to the Qwen model running locally through Ollama.
-model = ChatOllama(
-    model="qwen3:4b",
-    temperature=0,
-)
+def build_agent(record_path: Path | None = None, model=None):
+    """Create an agent whose record tools are bound to one selected JSON file."""
+    tools = [list_reproduction_scripts]
+    if record_path is not None:
+        tools.extend(create_record_tools(record_path))
+    if model is None:
+        model = ChatOllama(model="qwen3:4b", temperature=0)
+    return create_deep_agent(
+        model=model,
+        tools=tools,
+        system_prompt=(
+            "You are an assistant for the Fair Fairness Benchmark repository. "
+            "Call list_reproduction_scripts before answering questions about available experiments. "
+            "When a metric record is selected, use show_current_record to inspect it. "
+            "Call update_metric only when the user explicitly supplies both a metric name and a value. "
+            "Never invent a metric value, and report tool errors instead of claiming an update succeeded."
+        ),
+    )
 
-# Give the agent its model, tool, and instructions.
-agent = create_deep_agent(
-    model=model,
-    tools=[list_reproduction_scripts, update_metric_record],
-    system_prompt=(
-    "You are an assistant for the Fair Fairness Benchmark repository. "
-    "Use list_reproduction_scripts to answer questions about reproduction scripts. "
-    "Use update_metric_record when explicitly asked to update a metric in "
-    "the active evaluation record. Never invent metric values or update "
-    "records without a user request."
-    ),
-)
 
-# Give the agent a task. 
-result = agent.invoke(
-    {
-        "messages": [
-            {
-                "role": "user",
-                "content": (
-                   "Use the repository tool and tell me which reproduction "
-                    "experiments are available."
-                ),
-            }
-        ]
-    }
-)
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--record", type=Path, help="JSON record to expose to the agent")
+    parser.add_argument(
+        "--prompt",
+        default="Use the repository tool and tell me which reproduction experiments are available.",
+        help="Question or instruction for the agent",
+    )
+    args = parser.parse_args()
 
-print("\nFINAL ANSWER:")
-print(result["messages"][-1].content)
+    agent = build_agent(args.record)
+    result = agent.invoke({"messages": [{"role": "user", "content": args.prompt}]})
+    print(result["messages"][-1].content)
+
+
+if __name__ == "__main__":
+    main()
