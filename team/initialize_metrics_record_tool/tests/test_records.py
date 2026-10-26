@@ -46,6 +46,29 @@ class MetricsRecordTests(unittest.TestCase):
         )
         self.assertEqual(initialize_metrics_record(str(self.paper), ["F1"]), {"F1": None})
 
+    def test_compatibility_update_fills_missing_value_and_preserves_other_entries(self):
+        record = {"F1": None, "Accuracy": 92.0}
+        self.assertIs(insert_eval_metric(record, "F1", 0.87), record)
+        self.assertEqual(record, {"F1": 0.87, "Accuracy": 92.0})
+
+    def test_failed_compatibility_updates_preserve_record(self):
+        cases = [
+            ("F1", True, TypeError),
+            ("F1", "0.87", TypeError),
+            ("F1", None, TypeError),
+            ("F1", float("nan"), ValueError),
+            ("F1", float("inf"), ValueError),
+            (" ", 0.87, ValueError),
+            ("Unknown", 0.87, KeyError),
+        ]
+        for metric, value, error in cases:
+            with self.subTest(metric=metric, value=value):
+                record = {"F1": None, "Accuracy": 92.0}
+                before = record.copy()
+                with self.assertRaises(error):
+                    insert_eval_metric(record, metric, value)
+                self.assertEqual(record, before)
+
     def test_pdf_table_exact_row(self):
         from reportlab.lib import colors
         from reportlab.platypus import SimpleDocTemplate, Table, TableStyle

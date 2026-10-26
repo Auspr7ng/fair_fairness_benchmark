@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Union
 
+from team.insert_into_record_tool import MetricsRecord
+
 from team.eval_metrics_tool.eval_metrics.extraction import PaperContent, extract_paper
 from team.eval_metrics_tool.eval_metrics.matcher import find_metrics, normalize_metric
 from team.eval_metrics_tool.eval_metrics.scoring import rank_metrics
@@ -310,10 +312,13 @@ def create_eval_metrics_record(
 
 
 def insert_eval_metric(
-    record: dict[str, MetricValue], metric: str, value: MetricValue
+    record: dict[str, MetricValue], metric: str, value: Union[int, float]
 ) -> dict[str, MetricValue]:
-    """Update an initialized metric in place and return the same record."""
-    if metric not in record:
-        raise KeyError(f'Metric {metric!r} is not initialized in the record')
-    record[metric] = value
+    """Compatibility adapter for the dedicated record updater.
+
+    Preserve the caller's dictionary identity. Updates require finite numeric
+    values; missing values may remain None during initialization only.
+    """
+    validated = MetricsRecord(record)
+    record.update(validated.insert_into_record(metric, value))
     return record

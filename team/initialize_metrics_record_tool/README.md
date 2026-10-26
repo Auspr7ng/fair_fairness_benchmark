@@ -18,14 +18,23 @@ python -m pip install -r team/eval_metrics_tool/requirements.txt
 
 ```python
 from team.eval_metrics_tool.eval_metrics import extract_eval_metrics
-from team.initialize_metrics_record_tool import initialize_metrics_record, insert_eval_metric
+from team.initialize_metrics_record_tool import initialize_metrics_record
+from team.insert_into_record_tool import MetricsRecord
 
 names = extract_eval_metrics("paper.pdf", top_k=5)
 record = initialize_metrics_record("paper.pdf", names)
-insert_eval_metric(record, "F1", 0.87)  # fill or correct one entry
+managed_record = MetricsRecord(record)
+managed_record.insert_into_record("F1", 0.87)  # fill or correct one entry
 ```
 
 `initialize_metrics_record("paper.pdf", top_k=5)` discovers metric names itself.
+For later updates, use `MetricsRecord` from `insert_into_record_tool` as above.
+The existing `insert_eval_metric(record, metric, value)` name remains available
+as a compatibility adapter to that updater and still modifies and returns the
+same dictionary. It now applies the updater's validation: updates must be finite
+numbers, not booleans, strings, or `None`. Initialization can still leave missing
+values as `None`. Failed updates leave the supplied dictionary unchanged.
+
 It also accepts a UTF-8 `.txt` paper, aliases such as `"F1-score"`, and an
 optional `row_label="Ours"` to restrict extraction to a table row. For the FFB
 paper's Table 4, `row_label="Bank Age"` selects that dataset and sensitive
