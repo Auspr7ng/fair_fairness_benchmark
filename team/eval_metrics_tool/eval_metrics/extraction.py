@@ -7,6 +7,11 @@ import pdfplumber
 
 from .sections import OTHER, Section, split_sections
 
+# Word gap as a fraction of font size. pdfplumber's default fixed 3pt gap glues
+# words in tightly set papers ("averageprecision", "8 RelatedWork"). Passing
+# x_tolerance_ratio=None to extract_paper keeps that default.
+X_TOLERANCE_RATIO = 0.15
+
 
 class PDFReadError(Exception):
     """The file exists but could not be read as a PDF."""
@@ -29,7 +34,8 @@ def _clean(cell) -> str:
     return " ".join((cell or "").split())
 
 
-def extract_paper(pdf_path: str) -> PaperContent:
+def extract_paper(pdf_path: str,
+                  x_tolerance_ratio: float | None = X_TOLERANCE_RATIO) -> PaperContent:
     if not os.path.isfile(pdf_path):
         raise FileNotFoundError(f"PDF not found: {pdf_path}")
     page_texts: list[str] = []
@@ -37,7 +43,7 @@ def extract_paper(pdf_path: str) -> PaperContent:
     try:
         with pdfplumber.open(pdf_path) as pdf:
             for page in pdf.pages:
-                page_texts.append(page.extract_text() or "")
+                page_texts.append(page.extract_text(x_tolerance_ratio=x_tolerance_ratio) or "")
                 try:
                     tables = page.extract_tables()
                 except Exception:  # a bad table must not sink the whole paper

@@ -28,6 +28,7 @@ def test_ask_llm_truncates_and_passes_options(fake_litellm):
     assert ask_llm("text", "ollama/x", top_k=2, api_key="k") == ["a", "b"]
     call = fake_litellm.calls[0]
     assert call["temperature"] == 0 and call["api_key"] == "k"
+    assert call["drop_params"] is True  # models that reject temperature=0 still work
     assert "at most 2 metrics" in call["messages"][1]["content"]
 
 

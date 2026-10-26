@@ -10,6 +10,10 @@ ABSTRACT, INTRO, RELATED, METHOD, RESULTS, CONCLUSION, REFERENCES, OTHER = (
 )
 
 _NUM = r"(?:(?:\d+(?:\.\d+)*|[IVX]+)\.?\s+)?"
+# An appendix title is a few plain words ("Appendix B: Modeling Details"), so a
+# wrapped sentence ("Appendix D for details). We also ...") is not a heading.
+_APPENDIX = (r"appendix(?:\s+(?-i:[A-Z])(?:\.\d+)*\b)?"
+             r"(?:\s*[:.—–-]?\s+(?-i:[A-Z])[\w-]+(?:\s+[\w-]+){0,8})?")
 _RESULT_WORD = (r"(?:experiments?|experimental\s+(?:results|evaluation|setup|settings?)"
                 r"|results?|evaluations?|empirical\s+(?:results|evaluation)|main results"
                 r"|discussion|analysis)")
@@ -23,7 +27,7 @@ _HEADINGS = [
     (CONCLUSION, r"(?:conclusions?(?:\s+and\s+future\s+work)?|concluding\s+remarks"
                  r"|limitations|future\s+work)"),
     (REFERENCES, r"(?:references|bibliography)"),
-    (OTHER, r"(?:appendix(?:\s+[A-Z])?\b.{0,60}|appendices|supplementary\s+\w+.{0,40})"),
+    (OTHER, r"(?:" + _APPENDIX + r"|appendices|supplementary\s+\w+(?:\s+[\w-]+){0,6})"),
 ]
 _HEADING_RES = [(kind, re.compile(rf"^\s*{_NUM}{pat}\s*[:.]?\s*$", re.I))
                 for kind, pat in _HEADINGS]

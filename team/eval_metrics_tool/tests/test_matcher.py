@@ -41,6 +41,8 @@ def test_longest_match_wins():
 def test_short_acronym_traps():
     assert names("As it IS shown in Figure 2, the R2 region is large.") == []
     assert names("The EM algorithm and AP news.") == []
+    assert names("the distance |F0(x) - F1(x)| dx") == []  # a function, not the F1 score
+    assert names("F1 (%) is reported") == ["F1"]
 
 
 def test_short_acronyms_with_number_context():

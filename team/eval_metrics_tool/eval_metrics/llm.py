@@ -1,4 +1,4 @@
-"""Ask an LLM which metrics a paper's Experiments section reports (any LiteLLM provider).
+"""Ask an LLM which metrics a paper reports (any LiteLLM provider).
 
 The model is a LiteLLM model string, e.g. "ollama/qwen3:4b", "gpt-4o-mini",
 "anthropic/claude-haiku-5-5", "openrouter/...". API keys are read by LiteLLM
@@ -39,7 +39,8 @@ def load_env() -> Path | None:
     return path
 
 SYSTEM_PROMPT = (
-    "You read the Experiments section of an AI/ML research paper and identify "
+    "You read text from an AI/ML research paper (its Experiments section, or the "
+    "whole paper body when it has no such section) and identify "
     "the evaluation metrics the paper itself uses to report its results (e.g. "
     "accuracy, F1, BLEU, demographic parity difference). Ignore metrics that "
     "are only mentioned when discussing other people's work. Reply with only a "
@@ -89,11 +90,13 @@ def ask_llm(section: str, model: str, top_k: int = 5, api_base: str | None = Non
     load_env()  # API keys / EVAL_METRICS_API_BASE may come from .env
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": f"List at most {top_k} metrics.\n\nExperiments section:\n{section}"},
+        {"role": "user", "content": f"List at most {top_k} metrics.\n\nPaper text:\n{section}"},
     ]
     try:
+        # Some models reject temperature=0 (Claude 5, OpenAI reasoning models);
+        # drop_params makes LiteLLM omit it for them instead of failing.
         resp = litellm.completion(
-            model=model, messages=messages, temperature=0, timeout=timeout,
+            model=model, messages=messages, temperature=0, drop_params=True, timeout=timeout,
             api_base=api_base or os.environ.get(API_BASE_ENV), api_key=api_key,
         )
         reply = resp.choices[0].message.content or ""

@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from . import PDFReadError, experiments_section, extract_paper, llm_metrics, rank_metrics
+from . import PDFReadError, extract_paper, llm_metrics, llm_text, rank_metrics
 
 
 def main(argv=None) -> int:
@@ -16,7 +16,8 @@ def main(argv=None) -> int:
     p.add_argument("--api-key", help="API key; prefer the provider's env var (OPENAI_API_KEY, ...)")
     p.add_argument("--no-llm", action="store_true", help="use only the dictionary ranking")
     p.add_argument("--show-section", action="store_true",
-                   help="print the Experiments section (what the LLM is sent) and exit")
+                   help="print what the LLM is sent (the Experiments section, or the "
+                        "paper body if it has none) and exit")
     p.add_argument("--verbose", action="store_true",
                    help="dictionary ranking: also print each metric's score and where it was found")
     args = p.parse_args(argv)
@@ -28,7 +29,7 @@ def main(argv=None) -> int:
         print(f"error: {exc}", file=sys.stderr)
         return 1
     if args.show_section:
-        print(experiments_section(content))
+        print(llm_text(content))
         return 0
     if not args.no_llm:
         names, reason = llm_metrics(content, args.top_k, args.model, args.api_base,

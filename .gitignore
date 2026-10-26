@@ -18,6 +18,7 @@ ffb/weights/
 *.sh
 figures/*
 *.html
+.env
 
 
 

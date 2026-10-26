@@ -1,8 +1,8 @@
 """Extract the main evaluation metrics from a paper PDF.
 
-By default the paper's Experiments section is sent to an LLM (any LiteLLM
-provider, including local Ollama). Without a model, or if the call fails, the
-rule-based dictionary ranking is used instead.
+By default the paper's Experiments section (or, without one, the paper body) is
+sent to an LLM (any LiteLLM provider, including local Ollama). Without a model,
+or if the call fails, the rule-based dictionary ranking is used instead.
 """
 
 import warnings
@@ -10,7 +10,7 @@ import warnings
 from .extraction import PaperContent, PDFReadError, extract_paper
 from .llm import LLMError, ask_llm, resolve_model
 from .scoring import MetricScore, rank_metrics
-from .sections import RESULTS
+from .sections import REFERENCES, RESULTS
 
 __all__ = ["extract_eval_metrics", "rank_pdf", "PDFReadError", "LLMError", "MetricScore"]
 
@@ -29,6 +29,19 @@ def experiments_section(content: PaperContent) -> str:
     return "\n".join(s.text for s in content.sections if s.kind == RESULTS).strip()
 
 
+def llm_text(content: PaperContent) -> str:
+    """Text sent to the LLM: the Experiments section, or else the paper body.
+
+    Many papers title their experiments by topic ("5 Benchmarking Fairness
+    Methods"), so without an Experiments heading everything but References is
+    sent. Related Work stays in: an unrecognised heading after it would
+    otherwise drop the experiments with it, and the prompt tells the model to
+    ignore other people's metrics.
+    """
+    return experiments_section(content) or "\n".join(
+        s.text for s in content.sections if s.kind != REFERENCES).strip()
+
+
 def llm_metrics(content: PaperContent, top_k: int, model: str | None,
                 api_base: str | None = None,
                 api_key: str | None = None) -> tuple[list[str] | None, str | None]:
@@ -37,11 +50,11 @@ def llm_metrics(content: PaperContent, top_k: int, model: str | None,
     if not model:
         return None, ("no LLM model set (pass model= / --model or set "
                       "EVAL_METRICS_MODEL); using dictionary ranking")
-    section = experiments_section(content)
-    if not section:
-        return None, "no Experiments section found; using dictionary ranking"
+    text = llm_text(content)
+    if not text:
+        return None, "no text found in the PDF; using dictionary ranking"
     try:
-        return ask_llm(section, model, top_k, api_base=api_base, api_key=api_key), None
+        return ask_llm(text, model, top_k, api_base=api_base, api_key=api_key), None
     except LLMError as exc:
         return None, f"{exc}; using dictionary ranking"
 

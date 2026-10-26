@@ -8,10 +8,10 @@ This repository organizes the published [Fair Fairness Benchmark (FFB)](https://
 | --- | --- | --- |
 | FFB reference code | Original training scripts, models, metrics, dataset instructions, tutorial, and figures under [`ffb/`](ffb/) | Available as the baseline; the original paper's figures and running logs are upstream results, not new group results. |
 | CelebA reproduction | Four ResNet-18/ResNet-20 runners for ERM and DiffDP under [`ffb/reproduce/`](ffb/reproduce/) | Scripts and a dependency/data preflight are implemented. No completed run output is committed; training still needs the CelebA data and dependencies. |
-| PDF evaluation-metric extractor | [`team/eval_metrics_tool/`](team/eval_metrics_tool/) | Rule-based PDF text/table extraction, metric matching, and ranking are implemented. Scanned PDFs and some table layouts remain unsupported. |
+| PDF evaluation-metric extractor | [`team/eval_metrics_tool/`](team/eval_metrics_tool/) | Lists a paper's metrics with a user-configured LLM (any LiteLLM provider), falling back to rule-based PDF text/table extraction, metric matching, and ranking. Scanned PDFs and some table layouts remain unsupported. |
 | Metric record initializer | [`team/initialize_metrics_record_tool/`](team/initialize_metrics_record_tool/) | Extracts reported values into a metric-to-value record. Ambiguous or missing values remain empty for review. |
 | Metric record updater | [`team/insert_into_record_tool/`](team/insert_into_record_tool/) | Validates updates to an initialized record and saves the selected record as JSON. |
-| Local repository agent | [`team/agent/`](team/agent/) | A basic Ollama/LangChain agent can list the available reproduction scripts. It is not yet an automated experiment runner. |
+| Local repository agent | [`team/agent/`](team/agent/) | A basic Ollama/LangChain agent can list the available reproduction scripts, list a paper's evaluation metrics, and read or update a selected metric record. It is not yet an automated experiment runner. |
 
 ## Repository map
 
@@ -74,7 +74,7 @@ cd team/eval_metrics_tool
 python -m eval_metrics /path/to/paper.pdf --top-k 5
 ```
 
-The extractor returns ranked metric names based on mentions in the PDF; it does not compute benchmark scores. Its [README](team/eval_metrics_tool/README.md) explains the scoring rules and limitations. The development requirements list test dependencies, but no test suite is currently committed.
+The extractor returns metric names, most important first; it does not compute benchmark scores. To use an LLM, set `EVAL_METRICS_MODEL` (and your provider's API key) in your shell or a `.env` copied from [`.env.example`](team/eval_metrics_tool/.env.example). Without one, the extractor ranks metric mentions with its dictionary. Its [README](team/eval_metrics_tool/README.md) explains model setup, scoring rules, tests, and limitations.
 
 ### Initialize a paper metric record
 
@@ -104,7 +104,7 @@ python -m pip install -r team/agent/requirements.txt
 python team/agent/basic_agent.py
 ```
 
-The agent currently answers one demonstration question by calling a tool that lists files in `ffb/reproduce/`. See its [README](team/agent/README.md) for the recommended virtual environment setup.
+By default the agent answers one demonstration question by calling a tool that lists files in `ffb/reproduce/`. Pass `--prompt` to ask which metrics a paper PDF reports, or `--record` to work with a metric record. See its [README](team/agent/README.md) for the recommended virtual environment setup.
 
 ## Attribution
 

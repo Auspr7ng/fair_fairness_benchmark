@@ -3,8 +3,11 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from reportlab.lib import colors
+from reportlab.pdfgen import canvas
 
-from eval_metrics import PDFReadError, extract_eval_metrics, rank_pdf
+from eval_metrics import (PaperContent, PDFReadError, extract_eval_metrics, extract_paper,
+                          llm_text, rank_pdf)
+from eval_metrics.sections import split_sections
 
 
 def build_pdf(path):
@@ -109,12 +112,42 @@ def test_llm_failure_falls_back(pdf, fake_litellm):
         assert extract_eval_metrics(pdf, top_k=2, model="ollama/test") == ["F1", "BLEU"]
 
 
-def test_no_experiments_section_falls_back(tmp_path, fake_litellm):
+def test_no_experiments_section_sends_body(tmp_path, fake_litellm):
     p = tmp_path / "noexp.pdf"
     SimpleDocTemplate(str(p)).build([Paragraph("We report accuracy.", getSampleStyleSheet()["BodyText"])])
-    with pytest.warns(UserWarning, match="no Experiments section"):
-        assert extract_eval_metrics(str(p), model="ollama/test") == ["Accuracy"]
+    fake_litellm.reply = '["accuracy"]'
+    assert extract_eval_metrics(str(p), model="ollama/test") == ["accuracy"]
+    assert "We report accuracy." in fake_litellm.calls[0]["messages"][1]["content"]
+
+
+def test_body_fallback_keeps_text_after_related_work_and_skips_references():
+    # The unrecognised "4 Benchmarking ..." heading leaves its text in Related Work.
+    content = PaperContent(split_sections(
+        "Abstract\nWe report bias score.\n2 Related Work\nOthers used BLEU.\n"
+        "4 Benchmarking Fairness Methods\nTable 2: DP and accuracy.\nReferences\n[1] ROUGE.\n"))
+    sent = llm_text(content)
+    assert "bias score" in sent and "Table 2: DP" in sent
+    assert "ROUGE" not in sent
+
+
+def test_pdf_without_text_falls_back(tmp_path, fake_litellm):
+    p = tmp_path / "blank.pdf"
+    SimpleDocTemplate(str(p)).build([Spacer(1, 6)])
+    with pytest.warns(UserWarning, match="no text found"):
+        assert extract_eval_metrics(str(p), model="ollama/test") == []
     assert fake_litellm.calls == []
+
+
+def test_tightly_spaced_words_stay_apart(tmp_path):
+    p = tmp_path / "tight.pdf"
+    c = canvas.Canvas(str(p))
+    c.setFont("Helvetica", 10)
+    x = 72
+    for word in ["We", "report", "average", "precision."]:
+        c.drawString(x, 700, word)
+        x += c.stringWidth(word, "Helvetica", 10) + 2  # under pdfplumber's default 3pt gap
+    c.save()
+    assert "We report average precision." in extract_paper(str(p)).sections[0].text
 
 
 def test_cli_llm_and_show_section(pdf, fake_litellm, capsys):

@@ -1,4 +1,4 @@
-"""Run the local FFB agent with optional metric-record tools."""
+"""Run the local FFB agent with paper-metric and optional metric-record tools."""
 
 import argparse
 import sys
@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from team.agent.paper_tools import find_eval_metrics
 from team.agent.record_tools import create_record_tools
 
 
@@ -28,7 +29,7 @@ def list_reproduction_scripts() -> str:
 
 def build_agent(record_path: Path | None = None, model=None):
     """Create an agent whose record tools are bound to one selected JSON file."""
-    tools = [list_reproduction_scripts]
+    tools = [list_reproduction_scripts, find_eval_metrics]
     if record_path is not None:
         tools.extend(create_record_tools(record_path))
     if model is None:
@@ -39,6 +40,8 @@ def build_agent(record_path: Path | None = None, model=None):
         system_prompt=(
             "You are an assistant for the Fair Fairness Benchmark repository. "
             "Call list_reproduction_scripts before answering questions about available experiments. "
+            "When asked which evaluation metrics a paper reports, call find_eval_metrics with the PDF path "
+            "and say whether the names came from the LLM or the dictionary fallback. "
             "When a metric record is selected, use show_current_record to inspect it. "
             "Call update_metric only when the user explicitly supplies both a metric name and a value. "
             "Never invent a metric value, and report tool errors instead of claiming an update succeeded."

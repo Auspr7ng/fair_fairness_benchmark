@@ -286,8 +286,10 @@ def create_eval_metrics_record(
             raise ValueError('weights must be finite')
         scoring.update(weights)
     path = Path(pdf_path)
+    # pdfplumber's default spacing: the value weights were tuned on it, and the
+    # finer spacing exposes figure numbers that the text crawl mistakes for results.
     paper = (PaperContent(split_sections(path.read_text(encoding='utf-8')))
-             if path.suffix.lower() == '.txt' else extract_paper(str(path)))
+             if path.suffix.lower() == '.txt' else extract_paper(str(path), x_tolerance_ratio=None))
     names = ([score.name for score in rank_metrics(paper)[:top_k]]
              if metrics is None else [normalize_metric(name) or name for name in metrics])
     record = dict.fromkeys(names, None)

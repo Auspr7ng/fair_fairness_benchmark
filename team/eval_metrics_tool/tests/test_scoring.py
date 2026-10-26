@@ -1,6 +1,6 @@
 from eval_metrics.extraction import PaperContent, Table
 from eval_metrics.scoring import WEIGHTS, rank_metrics
-from eval_metrics.sections import split_sections
+from eval_metrics.sections import classify_heading, split_sections
 
 
 def paper(text, tables=()):
@@ -87,3 +87,13 @@ def test_section_detection_variants():
         "other", "abstract", "introduction", "related_work", "results",
         "conclusion", "references", "other"]
     assert split_sections("Abstract—We propose X.")[0].kind == "abstract"
+
+
+def test_appendix_headings_but_not_sentences():
+    for heading in ("Appendix", "Appendix A: Proofs of Theorems", "Appendix B Modeling Details.",
+                    "Appendix A.1 Extra Results", "Supplementary Material"):
+        assert classify_heading(heading) == "other", heading
+    # Wrapped body lines that merely start with "Appendix" must not end a section.
+    for line in ("Appendix §D.3 for details). We also observe that",
+                 "Appendix E), suggesting the need for models to", "Appendix C for the full results."):
+        assert classify_heading(line) is None, line

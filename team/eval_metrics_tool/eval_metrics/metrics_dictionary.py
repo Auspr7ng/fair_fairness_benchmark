@@ -54,7 +54,7 @@ METRICS: tuple[MetricSpec, ...] = (
                patterns=(r"(?:(?:macro|micro|weighted|sample)[- ]?)?f[- ]?(?:1|one)[- ]?(?:score|measure)",
                          r"f[- ]?measure", r"f[- ]?score"),
                cs_patterns=(r"(?:[Mm]acro|[Mm]icro|[Ww]eighted)[- ]?F[- ]?1",
-                            r"F[- ]?1", r"F_1")),
+                            r"F[- ]?1(?!\()", r"F_1")),  # not the function F1(x)
     MetricSpec("AUC",
                patterns=(r"roc[- ]?auc", r"auc[- ]?roc", r"auroc",
                          r"area under (?:the )?(?:roc|receiver operating characteristic)(?: curve)?"),

@@ -1,8 +1,8 @@
 # eval_metrics
 
 Extracts the most important evaluation metrics a research paper PDF reports.
-The tool pulls out the paper's Experiments section and sends only that to an
-LLM. Any provider works through [LiteLLM](https://docs.litellm.ai/docs/providers),
+The tool sends the paper's Experiments section to an LLM, or the whole paper
+body (minus References) when no Experiments heading is found. Any provider works through [LiteLLM](https://docs.litellm.ai/docs/providers),
 including local models via Ollama. No API key ships with this project; bring
 your own, or use a local model. If no model is set or the call fails, it falls
 back to a deterministic, rule-based dictionary ranking.
@@ -61,7 +61,7 @@ fallback returns canonical names. When the tool falls back, it issues a
 
 ```bash
 python -m eval_metrics paper.pdf --model ollama/qwen3:4b   # one metric per line
-python -m eval_metrics paper.pdf --show-section            # print the Experiments section sent to the LLM
+python -m eval_metrics paper.pdf --show-section            # print the text sent to the LLM
 python -m eval_metrics paper.pdf --no-llm --verbose        # dictionary: + score and where found
 ```
 
@@ -72,17 +72,23 @@ Run both from `team/eval_metrics_tool/`.
 LLM path:
 
 1. pdfplumber extraction and section splitting (below).
-2. Keep only the Experiments section: the text under headings that
-   `sections.py` classifies as Experiments / Results / Evaluation (several such
-   headings are joined). Nothing else is sent. If there is no such heading,
-   the dictionary fallback is used.
+2. Choose the text to send (`llm_text`). This is the Experiments section: the
+   text under headings that `sections.py` classifies as Experiments / Results /
+   Evaluation (several such headings are joined). Many papers title their
+   experiments by topic instead ("5 Benchmarking Current Fairness Methods").
+   Without such a heading, every section except References is sent. If the
+   PDF has no text at all, the dictionary fallback is used.
 3. `llm.py` asks the model for a JSON array of the metrics the paper reports
-   (temperature 0) and parses it, ignoring `<think>` blocks from reasoning models.
+   and parses it, ignoring `<think>` blocks from reasoning models. It asks for
+   temperature 0. Models that reject that setting (Claude 5, OpenAI reasoning
+   models) run at their default instead of failing.
 
 Dictionary fallback:
 
 1. `extraction.py` reads page text and tables with pdfplumber
-   (`page.extract_text()`, `page.extract_tables()`), splits the text into
+   (`page.extract_text()`, `page.extract_tables()`). The word gap is set
+   relative to font size (`X_TOLERANCE_RATIO`), because pdfplumber's fixed
+   default glues words together in tightly set papers. It then splits the text into
    sections by heading heuristics (`sections.py`: Abstract, Introduction,
    Related Work, Method, Experiments/Results/Evaluation, Conclusion,
    References), and tags each table with the section its page mostly belongs to.
@@ -119,22 +125,32 @@ Patterns are regexes without word boundaries (added automatically):
 - `cs_patterns`: case-sensitive, for distinctive acronyms ("BLEU").
 - `context_patterns`: case-sensitive and context-gated, for short or ambiguous acronyms.
 
-When adding tests, include an alias case for the new pattern. A test suite is
-not yet committed in this repository.
+When adding a metric, add an alias case for the new pattern to `tests/test_matcher.py`.
 
 ## Tests
 
-No automated tests are currently committed. The development requirements
-include `pytest` and `reportlab` for future tests.
+```bash
+pip install -r requirements-dev.txt
+python -m pytest          # from team/eval_metrics_tool/
+```
+
+The tests build small PDFs with reportlab and replace `litellm` with a fake, so
+they need no network, API key or local model. They also never read your `.env`.
 
 ## Known limitations
 
 - The LLM path is only as good as the model. Small local models may miss
   metrics or list ones from other papers. Use `--show-section` to check what it saw.
-- The LLM sees only the Experiments section. Metrics reported only in the
-  abstract, or in a section with an unrecognised heading, are missed.
-- The whole section is sent with no length limit. Long sections can exceed a
-  small local model's context window (Ollama defaults to a few thousand tokens).
+- When a paper has an Experiments heading, the LLM sees only that section.
+  Metrics reported only in the abstract, or in a separately titled results
+  section, are missed.
+- Without an Experiments heading, the LLM sees the whole body, Related Work
+  included. Small models may then list metrics from other papers.
+- Text is sent with no length limit. A whole-body fallback is often 50–90k
+  characters, which exceeds a small local model's context window (Ollama
+  defaults to a few thousand tokens).
+- Models that reject temperature 0 (Claude 5, OpenAI reasoning models) can
+  return slightly different lists on different runs.
 
 - Scanned / image-only PDFs are not supported (no OCR); they yield `[]`.
 - Two-column layouts may scramble text order, which can break heading and caption detection.
