@@ -37,6 +37,19 @@ class TestLangChainTool(unittest.TestCase):
                 self.assertIn("Error", self.invoke_update("F1", value))
                 self.assertEqual(self.path.read_bytes(), original)
 
+    def test_legacy_and_selected_tools_share_validation_and_persistence(self):
+        from team.insert_into_record_tool.langchain_tool import create_record_tools
+        MetricsRecord({"F1": None}).save_json(self.path)
+        _, selected = create_record_tools(self.path)
+        for value in (0.87, True, "0.87", float("nan")):
+            with self.subTest(value=value):
+                self.path.write_text('{"F1": null}')
+                self.invoke_update("F1", value)
+                legacy = self.path.read_bytes()
+                self.path.write_text('{"F1": null}')
+                selected.invoke({"metric": "F1", "value": value})
+                self.assertEqual(self.path.read_bytes(), legacy)
+
     def test_default_path_is_repository_root(self):
         from team.insert_into_record_tool.langchain_tool import REPO_ROOT
         self.assertEqual(REPO_ROOT, Path(__file__).resolve().parents[3])

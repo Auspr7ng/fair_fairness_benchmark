@@ -62,3 +62,14 @@ python -m unittest discover -s team/agent/tests -v
 ```
 
 These tests also run the real DeepAgents graph with a scripted model. In one test it calls `find_eval_metrics`; in another it reads the record, updates it, and reads back the persisted value. They verify failed updates, preservation of another record, and that the paper tool reports errors and fallbacks instead of raising. The paper-tool tests never read your `.env`. This checks integration, not Qwen’s ability to choose the right tool. A live model run still requires Ollama and `qwen3:4b`.
+
+## Ownership of shared logic
+
+The insert-into-record package owns `create_record_tools`, including record
+selection, validation, persistence, and update responses. The old
+`team.agent.record_tools` import and default-record `update_metric_record` tool
+are compatibility adapters; the agent registers only one update tool.
+
+The paper tool calls the extractor's `select_metrics` function. That same
+function serves the Python API and CLI, so model failures follow one dictionary
+fallback path. Each caller formats its own warnings or responses.

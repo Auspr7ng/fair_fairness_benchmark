@@ -61,6 +61,15 @@ class PaperToolTests(unittest.TestCase):
         self.assertIn("no LLM model set", result["note"])
         self.extract.assert_called_once_with("paper.pdf")
 
+    def test_model_failure_uses_shared_fallback(self):
+        from team.eval_metrics_tool import eval_metrics as extractor
+        with patch.object(extractor, "llm_metrics", return_value=(None, "model failed")):
+            expected = extractor.select_metrics(PAPER, top_k=1)
+            result = json.loads(paper_tools.find_eval_metrics.invoke({"pdf_path": "paper.pdf", "top_k": 1}))
+        self.assertEqual(result["metrics"], expected.names)
+        self.assertEqual(result["source"], expected.source)
+        self.assertEqual(result["note"], expected.reason)
+
     def test_model_from_env_is_used(self):
         os.environ[llm.MODEL_ENV] = "ollama/test"
         fake = FakeLiteLLM('["accuracy", "F1 score"]')

@@ -5,8 +5,7 @@ from pathlib import Path
 
 from langchain_core.tools import tool
 
-from team.eval_metrics_tool.eval_metrics import (PDFReadError, extract_paper, llm_metrics,
-                                                 rank_metrics)
+from team.eval_metrics_tool.eval_metrics import (PDFReadError, extract_paper, select_metrics)
 
 
 @tool
@@ -24,12 +23,9 @@ def find_eval_metrics(pdf_path: str, top_k: int = 5) -> str:
     except (FileNotFoundError, PDFReadError, ValueError) as exc:
         return json.dumps({"pdf": pdf_path, "error": str(exc)})
 
-    # The extractor's LLM comes from EVAL_METRICS_MODEL (shell or .env), not the agent's model.
-    names, reason = llm_metrics(content, top_k, model=None)
-    result = {"pdf": Path(pdf_path).name, "source": "llm"}
-    if names is None:
-        # The fallback reason goes in the reply: the agent never sees warnings.
-        names = [s.name for s in rank_metrics(content)[:top_k]]
-        result.update(source="dictionary", note=reason)
-    result["metrics"] = names
+    selection = select_metrics(content, top_k)
+    result = {"pdf": Path(pdf_path).name, "source": selection.source,
+              "metrics": selection.names}
+    if selection.reason:
+        result["note"] = selection.reason
     return json.dumps(result)

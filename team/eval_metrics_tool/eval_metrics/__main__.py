@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from . import PDFReadError, extract_paper, llm_metrics, llm_text, rank_metrics
+from . import PDFReadError, extract_paper, llm_text, select_metrics
 
 
 def main(argv=None) -> int:
@@ -31,20 +31,17 @@ def main(argv=None) -> int:
     if args.show_section:
         print(llm_text(content))
         return 0
-    if not args.no_llm:
-        names, reason = llm_metrics(content, args.top_k, args.model, args.api_base,
-                                    args.api_key)
-        if names is not None:
-            for name in names:
-                print(name)
-            return 0
-        print(f"note: {reason}", file=sys.stderr)
-    for s in rank_metrics(content)[: args.top_k]:
-        if args.verbose:
+    result = select_metrics(content, args.top_k, args.model, args.api_base,
+                            args.api_key, use_llm=not args.no_llm)
+    if result.reason:
+        print(f"note: {result.reason}", file=sys.stderr)
+    if args.verbose and result.scores is not None:
+        for s in result.scores:
             where = ", ".join(f"{loc} x{n}" for loc, n in s.where.most_common())
             print(f"{s.name}\tscore={s.score}\t{where}\te.g. {s.example!r}")
-        else:
-            print(s.name)
+    else:
+        for name in result.names:
+            print(name)
     return 0
 
 

@@ -160,3 +160,10 @@ they need no network, API key or local model. They also never read your `.env`.
 - Metrics referred to only by symbols or nonstandard names are missed.
 - Words like "precision" or "recall" in a non-metric sense can still slip through despite basic filters.
 - Section detection is heading-regex based and imperfect; a missed "Related Work" heading means its metrics count.
+
+### Shared extraction decision
+
+`select_metrics(content, ...)` owns the LLM-or-dictionary choice for the Python
+API, CLI, and paper agent tool. Its result includes names, source, fallback
+reason, and dictionary scores (for verbose CLI output). An empty successful LLM
+result stays empty; only an unavailable or failed model triggers fallback.

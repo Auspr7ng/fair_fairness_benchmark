@@ -6,6 +6,7 @@ or if the call fails, the rule-based dictionary ranking is used instead.
 """
 
 import warnings
+from dataclasses import dataclass
 
 from .extraction import PaperContent, PDFReadError, extract_paper
 from .llm import LLMError, ask_llm, resolve_model
@@ -59,6 +60,30 @@ def llm_metrics(content: PaperContent, top_k: int, model: str | None,
         return None, f"{exc}; using dictionary ranking"
 
 
+@dataclass
+class MetricSelection:
+    """One shared extraction decision, with evidence for dictionary results."""
+    names: list[str]
+    source: str
+    reason: str | None = None
+    scores: list[MetricScore] | None = None
+
+
+def select_metrics(content: PaperContent, top_k: int = 5, model: str | None = None,
+                   api_base: str | None = None, api_key: str | None = None,
+                   use_llm: bool = True) -> MetricSelection:
+    """Select names once for the Python API, CLI, and agent tool."""
+    if top_k < 1:
+        raise ValueError("top_k must be >= 1")
+    reason = None
+    if use_llm:
+        names, reason = llm_metrics(content, top_k, model, api_base, api_key)
+        if names is not None:
+            return MetricSelection(names, "llm")
+    scores = rank_metrics(content)[:top_k]
+    return MetricSelection([s.name for s in scores], "dictionary", reason, scores)
+
+
 def extract_eval_metrics(pdf_path: str, top_k: int = 5, model: str | None = None,
                          api_base: str | None = None, api_key: str | None = None,
                          use_llm: bool = True) -> list[str]:
@@ -75,9 +100,7 @@ def extract_eval_metrics(pdf_path: str, top_k: int = 5, model: str | None = None
     if top_k < 1:
         raise ValueError("top_k must be >= 1")
     content = extract_paper(pdf_path)
-    if use_llm:
-        names, reason = llm_metrics(content, top_k, model, api_base, api_key)
-        if names is not None:
-            return names
-        warnings.warn(reason, stacklevel=2)
-    return [s.name for s in rank_metrics(content)[:top_k]]
+    result = select_metrics(content, top_k, model, api_base, api_key, use_llm)
+    if result.reason:
+        warnings.warn(result.reason, stacklevel=2)
+    return result.names

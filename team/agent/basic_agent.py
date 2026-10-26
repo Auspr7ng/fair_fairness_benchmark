@@ -14,7 +14,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from team.agent.paper_tools import find_eval_metrics
-from team.agent.record_tools import create_record_tools
+from team.insert_into_record_tool.langchain_tool import create_record_tools
 
 
 @tool
