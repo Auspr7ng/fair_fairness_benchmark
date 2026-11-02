@@ -44,6 +44,11 @@ def select_metrics(content: PaperContent, top_k: int = 5, model: str | None = No
     if use_llm:
         names, reason = llm_metrics(content, top_k, model, api_base, api_key)
         if names is not None:
-            return MetricSelection(names, "llm")
+            if not names:
+                reason = ("the LLM returned no evaluation metrics; this does not confirm "
+                          "the paper has none. Check the extracted text and section "
+                          "selection before using this result")
+            return MetricSelection(names, "llm", reason)
     scores = rank_metrics(content)[:top_k]
     return MetricSelection([s.name for s in scores], "dictionary", reason, scores)
+

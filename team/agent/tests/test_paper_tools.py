@@ -89,6 +89,14 @@ class PaperToolTests(unittest.TestCase):
         result = json.loads(paper_tools.find_eval_metrics.invoke({"pdf_path": "paper.pdf", "top_k": 0}))
         self.assertIn("top_k", result["error"])
 
+    def test_empty_llm_result_includes_a_note(self):
+        os.environ[llm.MODEL_ENV] = "ollama/test"
+        with patch.dict(sys.modules, {"litellm": FakeLiteLLM('[]')}):
+            result = json.loads(paper_tools.find_eval_metrics.invoke({"pdf_path": "paper.pdf"}))
+        self.assertEqual(result['metrics'], [])
+        self.assertEqual(result['source'], 'llm')
+        self.assertIn('the LLM returned no evaluation metrics', result['note'])
+
     def test_agent_graph_calls_tool(self):
         model = ScriptedToolModel(responses=[
             AIMessage(content="", tool_calls=[{
@@ -104,3 +112,4 @@ class PaperToolTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

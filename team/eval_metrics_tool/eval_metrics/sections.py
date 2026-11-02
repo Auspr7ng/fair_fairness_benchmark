@@ -33,6 +33,15 @@ _HEADING_RES = [(kind, re.compile(rf"^\s*{_NUM}{pat}\s*[:.]?\s*$", re.I))
                 for kind, pat in _HEADINGS]
 # "Abstract—We propose..." / "Abstract. We ..." on a single line.
 _INLINE_ABSTRACT = re.compile(r"^\s*abstract\s*[—–:.\-]+\s*\S", re.I)
+# Two-column PDFs can place a short equation fragment before the heading in
+# the adjacent column (e.g. "i n 5. Experiments"). Accept only single-letter
+# fragments and a complete numbered result heading, not prose mentioning it.
+_COLUMN_RESULTS = re.compile(
+    rf"^(?:[A-Za-z]\s+){{1,6}}\d+(?:\.\d+)*\.?\s+{_RESULT_WORD}\s*[:.]?\s*$",
+    re.I,
+)
+# A bibliography heading can share a line with the other column's citation.
+_COLUMN_REFERENCES = re.compile(r"^\s*(?:references|bibliography)\s+\[\d+\](?:\s|$)", re.I)
 
 
 @dataclass
@@ -45,8 +54,12 @@ class Section:
 
 
 def classify_heading(line: str) -> str | None:
+    if _COLUMN_REFERENCES.match(line):
+        return REFERENCES
     if len(line) > 70:
         return None
+    if _COLUMN_RESULTS.match(line):
+        return RESULTS
     if _INLINE_ABSTRACT.match(line):
         return ABSTRACT
     for kind, regex in _HEADING_RES:
@@ -70,3 +83,4 @@ def split_sections(text: str) -> list[Section]:
     if pos > start or not sections:
         sections.append(Section(kind, heading, text[start:pos], start, pos))
     return sections
+
