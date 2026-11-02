@@ -3,6 +3,7 @@ import pytest
 from unittest.mock import patch
 
 import eval_metrics as api
+from eval_metrics import selection
 from eval_metrics.__main__ import main
 from eval_metrics.extraction import PaperContent
 from eval_metrics.sections import split_sections
@@ -13,7 +14,7 @@ def test_api_and_cli_share_selection(names, reason, capsys):
     paper = PaperContent(split_sections('Experiments\nWe report accuracy and F1.'))
     with patch.object(api, 'extract_paper', return_value=paper), \
          patch('eval_metrics.__main__.extract_paper', return_value=paper), \
-         patch.object(api, 'llm_metrics', return_value=(names, reason)):
+         patch.object(selection, 'llm_metrics', return_value=(names, reason)):
         if reason:
             with pytest.warns(UserWarning, match=reason):
                 expected = api.extract_eval_metrics('paper.pdf')
@@ -27,7 +28,7 @@ def test_api_and_cli_share_selection(names, reason, capsys):
 
 def test_dictionary_only_skips_model_and_retains_verbose_evidence():
     paper = PaperContent(split_sections('Experiments\nWe report accuracy.'))
-    with patch.object(api, 'llm_metrics') as model:
+    with patch.object(selection, 'llm_metrics') as model:
         result = api.select_metrics(paper, use_llm=False)
     model.assert_not_called()
     assert result.source == 'dictionary'

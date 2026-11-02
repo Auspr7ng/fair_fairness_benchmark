@@ -63,7 +63,8 @@ class PaperToolTests(unittest.TestCase):
 
     def test_model_failure_uses_shared_fallback(self):
         from team.eval_metrics_tool import eval_metrics as extractor
-        with patch.object(extractor, "llm_metrics", return_value=(None, "model failed")):
+        from team.eval_metrics_tool.eval_metrics import selection
+        with patch.object(selection, "llm_metrics", return_value=(None, "model failed")):
             expected = extractor.select_metrics(PAPER, top_k=1)
             result = json.loads(paper_tools.find_eval_metrics.invoke({"pdf_path": "paper.pdf", "top_k": 1}))
         self.assertEqual(result["metrics"], expected.names)

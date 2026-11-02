@@ -69,6 +69,23 @@ Run both from `team/eval_metrics_tool/`.
 
 ## How it works
 
+### Component responsibilities
+
+- `__init__.py`: public Python entry points and compatibility imports.
+- `__main__.py`: command-line arguments and output formatting.
+- `extraction.py`: PDF text and table reading.
+- `sections.py`: recognizing section headings.
+- `paper_text.py`: choosing the paper text sent to the model.
+- `llm.py`: model configuration, provider calls, and reply parsing.
+- `selection.py`: one shared metric-selection and fallback policy for the API,
+  command line, and agent, including source, fallback reason, and score evidence.
+- `matcher.py` and `metrics_dictionary.py`: recognizing metric names.
+- `scoring.py`: ranking dictionary matches.
+
+The existing package imports, including `select_metrics`, `llm_metrics`,
+`MetricSelection`, `llm_text`, and `experiments_section`, remain available.
+This organization does not change metric names, output formats, or fallback rules.
+
 LLM path:
 
 1. pdfplumber extraction and section splitting (below).
