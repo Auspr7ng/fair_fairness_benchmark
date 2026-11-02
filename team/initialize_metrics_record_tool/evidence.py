@@ -55,5 +55,3 @@ def _context_features(text):
     if _BASELINE.search(text):
         features.append('baseline')
     return features
-
-

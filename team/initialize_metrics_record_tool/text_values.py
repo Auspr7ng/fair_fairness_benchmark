@@ -66,5 +66,3 @@ def _crawl_text(paper, wanted, weights, window):
                 evidence.append(_Evidence(mention.metric, value, score, text,
                                           tuple(['proximity'] + features)))
     return evidence
-
-

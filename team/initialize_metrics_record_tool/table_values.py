@@ -98,5 +98,3 @@ def _crawl_unruled_table_row(paper, wanted, weights, row_label):
                     evidence.append(_Evidence(metric, value, score, context,
                                               tuple(features)))
     return evidence
-
-

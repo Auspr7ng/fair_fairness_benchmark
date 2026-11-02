@@ -22,5 +22,3 @@ def _rank_values(evidence, weights):
     for values in ranked.values():
         values.sort(key=lambda pair: (-pair[1], pair[0]))
     return ranked
-
-

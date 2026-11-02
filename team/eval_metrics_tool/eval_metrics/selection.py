@@ -47,5 +47,3 @@ def select_metrics(content: PaperContent, top_k: int = 5, model: str | None = No
             return MetricSelection(names, "llm")
     scores = rank_metrics(content)[:top_k]
     return MetricSelection([s.name for s in scores], "dictionary", reason, scores)
-
-

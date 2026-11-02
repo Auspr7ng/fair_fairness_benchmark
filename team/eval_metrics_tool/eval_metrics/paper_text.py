@@ -24,5 +24,3 @@ def llm_text(content: PaperContent) -> str:
     """
     return experiments_section(content) or "\n".join(
         s.text for s in content.sections if s.kind != REFERENCES).strip()
-
-
