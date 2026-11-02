@@ -72,7 +72,21 @@ unqualified call may therefore return `None` rather than choose an arbitrary
 one. Scanned PDFs have no OCR, and complex or scrambled PDF tables may need
 manual review.
 
-## Tests
+## Component responsibilities
+
+- `records.py` coordinates validation, paper loading, evidence collection, and
+  record creation; its existing public functions remain available.
+- `evidence.py` holds shared evidence fields, scoring weights, number syntax,
+  and context cues.
+- `text_values.py` finds candidate values in prose.
+- `table_values.py` finds candidate values in ruled tables and selected
+  plain-text table rows.
+- `value_ranking.py` combines evidence and ranks candidate values.
+
+This split preserves the extraction rules, thresholds, output format, and
+the update adapter that delegates to `insert_into_record_tool`.
+
+## Running tests
 
 The tests use the optional development dependencies (including ReportLab):
 
