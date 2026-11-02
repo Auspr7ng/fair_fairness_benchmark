@@ -11,6 +11,7 @@ import argparse
 import csv
 import importlib.util
 import json
+import math
 import os
 import random
 import sys
@@ -35,6 +36,7 @@ def preflight(csv_path: Path) -> dict:
 def sample_rows(csv_path: Path, max_samples: int, seed: int):
     rng = random.Random(seed)
     rows = []
+    seen = -1
     with csv_path.open(newline="", encoding="utf-8") as stream:
         reader = csv.DictReader(stream)
         required = {"pixels", "Attractive", "Male", "Smiling", "Wavy_Hair", "Young"}
@@ -49,6 +51,8 @@ def sample_rows(csv_path: Path, max_samples: int, seed: int):
                 idx = rng.randrange(seen + 1)
                 if idx < max_samples:
                     rows[idx] = item
+    if seen < 0:
+        raise ValueError("CelebA CSV contains no data rows")
     return rows, seen + 1
 
 
@@ -70,7 +74,11 @@ def main(default_architecture: str = "resnet18", default_method: str = "erm") ->
     args = parser.parse_args()
     if args.max_samples < 0:
         parser.error("--max-samples must be nonnegative")
-    if args.lam < 0:
+    if args.steps < 1 or args.batch_size < 1 or args.eval_batch_size < 1:
+        parser.error("steps and batch sizes must be positive")
+    if not math.isfinite(args.lr) or args.lr <= 0:
+        parser.error("--lr must be finite and positive")
+    if not math.isfinite(args.lam) or args.lam < 0:
         parser.error("--lam must be nonnegative")
     if args.weights is None:
         args.weights = "imagenet" if args.architecture == "resnet18" else "random"
@@ -115,7 +123,10 @@ def main(default_architecture: str = "resnet18", default_method: str = "erm") ->
     images = (pixels / 255.0).reshape(-1, 3, 48, 48)
     attr = np.asarray([[float(v) for v in row[1:]] for row in rows], dtype=np.float32)
     indices = np.arange(len(rows))
-    stratify = attr if args.max_samples == 0 else attr[:, [2, 3]]
+    if not np.isfinite(images).all() or not np.isin(attr, [0, 1]).all():
+        raise ValueError("Expected finite pixels and binary CelebA attributes")
+    # Stratify consistently on target/group, not all five attributes.
+    stratify = attr[:, [2, 3]]
     train_idx, hold_idx = train_test_split(indices, test_size=0.2, stratify=stratify, random_state=args.seed)
     test_idx, val_idx = train_test_split(
         hold_idx, test_size=0.5, stratify=stratify[hold_idx], random_state=args.seed
@@ -152,6 +163,7 @@ def main(default_architecture: str = "resnet18", default_method: str = "erm") ->
     criterion = torch.nn.BCELoss()
     fair_criterion = DiffDP() if args.method == "diffdp" else None
     batches = iter(train_loader)
+    skipped_fairness_batches = 0
     last_loss = None
     last_clf_loss = None
     last_fair_loss = None
@@ -169,7 +181,13 @@ def main(default_architecture: str = "resnet18", default_method: str = "erm") ->
             fair_loss = None
             loss = clf_loss
         else:
-            fair_loss = fair_criterion(pred, a[:, 3:4].to(device))
+            if torch.unique(a[:, 3]).numel() < 2:
+                # A group contrast is undefined in this batch; still train the
+                # classifier and explicitly report the skipped fairness term.
+                fair_loss = pred.sum() * 0
+                skipped_fairness_batches += 1
+            else:
+                fair_loss = fair_criterion(pred, a[:, 3:4].to(device))
             if not torch.isfinite(fair_loss):
                 raise ValueError("DiffDP loss is non-finite; check both sensitive groups in the batch")
             loss = clf_loss + args.lam * fair_loss
@@ -210,14 +228,16 @@ def main(default_architecture: str = "resnet18", default_method: str = "erm") ->
         "torch_version": torch.__version__, "numpy_version": np.__version__,
         "checkpoint": str(checkpoint),
         "split_sizes": {"train": len(train_idx), "validation": len(val_idx), "test": len(test_idx)},
+        "skipped_fairness_batches": skipped_fairness_batches,
         "last_train_loss": last_loss, "last_classifier_loss": last_clf_loss,
         "last_fairness_loss": last_fair_loss, "validation": evaluate(val_loader, "val"),
         "test": evaluate(test_loader, "test"),
     }
-    args.output.write_text(json.dumps(result, indent=2), encoding="utf-8")
+    args.output.write_text(json.dumps(result, indent=2, allow_nan=False), encoding="utf-8")
     print(json.dumps({"output": str(args.output), "test": result["test"]}, indent=2))
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

@@ -429,41 +429,50 @@ def metric_evaluation(y_gt, y_pre, s, s_pre=None, prefix=""):
     y_pre = y_pre.ravel()
     s = s.ravel()
 
-    # Calculate various performance metrics
-    acc = metrics.accuracy_score(y_gt, y_pre > 0.5) * 100
-    ap = metrics.average_precision_score(y_gt, y_pre) * 100
-    precision = metrics.precision_score(y_gt, y_pre > 0.5, zero_division=0) * 100
-    recall = metrics.recall_score(y_gt, y_pre > 0.5) * 100
-    f1 = metrics.f1_score(y_gt, y_pre > 0.5) * 100
-    auc = metrics.roc_auc_score(y_gt, y_pre) * 100
+    if not (len(y_gt) == len(y_pre) == len(s)) or not len(y_gt):
+        raise ValueError("Evaluation requires nonempty arrays of equal length")
+    if not np.isfinite(y_pre).all() or not np.isin(y_gt, [0, 1]).all() or not np.isin(s, [0, 1]).all():
+        raise ValueError("Expected finite predictions and binary labels/groups")
+    if ((y_pre < 0) | (y_pre > 1)).any():
+        raise ValueError("Predictions must be probabilities between 0 and 1")
+    groups = all(np.any(s == group) for group in (0, 1))
+    positives = groups and all(np.any((s == group) & (y_gt == 1)) for group in (0, 1))
+    negatives = groups and all(np.any((s == group) & (y_gt == 0)) for group in (0, 1))
+    predicted_positive = groups and all(np.any((s == group) & (y_pre > .5)) for group in (0, 1))
+    values = {}
 
-    # Calculate various fairness metrics
-    dp = demographic_parity(y_pre, s, threshold=0.5)
-    dpe = demographic_parity(y_pre, s, threshold=None)
-    aucp = auc_parity(y_pre, y_gt, s)
-    accp = accuracy_parity(y_pre, y_gt, s)
-    ppv = predictive_parity_value(y_pre, y_gt, s)
-    bfp = balance_for_positive_class(y_pre, y_gt, s)
-    bfn = balance_for_negative_class(y_pre, y_gt, s)
+    def score(name, eligible, calculate):
+        if not eligible:
+            values[prefix + "/" + name] = None
+            return
+        value = float(calculate())
+        values[prefix + "/" + name] = value if np.isfinite(value) else None
 
-    prule = p_rule(y_pre, s, threshold=0.5)
-    prulee = p_rule(y_pre, s, threshold=None)
+    score("acc", True, lambda: metrics.accuracy_score(y_gt, y_pre > .5) * 100)
+    score("ap", np.any(y_gt == 1), lambda: metrics.average_precision_score(y_gt, y_pre) * 100)
+    score("precision", True, lambda: metrics.precision_score(y_gt, y_pre > .5, zero_division=0) * 100)
+    score("recall", np.any(y_gt == 1), lambda: metrics.recall_score(y_gt, y_pre > .5, zero_division=0) * 100)
+    score("f1", True, lambda: metrics.f1_score(y_gt, y_pre > .5, zero_division=0) * 100)
+    score("auc", len(np.unique(y_gt)) == 2, lambda: metrics.roc_auc_score(y_gt, y_pre) * 100)
+    for name, fn, eligible in [
+        ("dp", lambda: demographic_parity(y_pre, s), groups),
+        ("dpe", lambda: demographic_parity(y_pre, s, threshold=None), groups),
+        ("aucp", lambda: auc_parity(y_pre, y_gt, s), positives and negatives),
+        ("accp", lambda: accuracy_parity(y_pre, y_gt, s), groups),
+        ("ppv", lambda: predictive_parity_value(y_pre, y_gt, s), predicted_positive),
+        ("bfp", lambda: balance_for_positive_class(y_pre, y_gt, s), positives),
+        ("bfn", lambda: balance_for_negative_class(y_pre, y_gt, s), negatives),
+        ("prule", lambda: p_rule(y_pre, s), groups),
+        ("prulee", lambda: p_rule(y_pre, s, threshold=None), groups),
+        ("eopp", lambda: equal_opportunity(y_pre, y_gt, s), positives),
+        ("eoppe", lambda: equal_opportunity(y_pre, y_gt, s, threshold=None), positives),
+        ("eodd", lambda: equalized_odds(y_pre, y_gt, s), positives and negatives),
+        ("eodde", lambda: equalized_odds(y_pre, y_gt, s, threshold=None), positives and negatives),
+        ("abcc", lambda: ABCC(y_pre, y_gt, s), groups),
+    ]:
+        score(name, eligible, fn)
+    return values
 
-    eopp = equal_opportunity(y_pre, y_gt, s, threshold=0.5)
-    eoppe = equal_opportunity(y_pre, y_gt, s, threshold=None)
-    eodd = equalized_odds(y_pre, y_gt, s, threshold=0.5)
-    eodde = equalized_odds(y_pre, y_gt, s, threshold=None)
-
-    # abpc = ABPC(y_pre, y_gt, s)
-    abcc = ABCC(y_pre, y_gt, s)
-    # avg_alpha, af_list = alpha_fairness_metric( y_pre, y_gt, s, s_pre, sample_n=10, threshold=None )
-
-    # Store metric names and values in a dictionary
-    metric_name = ["acc", "ap", "precision", "recall", "f1", "auc", "dp", "dpe", "aucp", "eopp", "eoppe", "eodd", "eodde", "prule", "prulee", "abcc", "accp", "ppv", "bfp", "bfn"]
-    metric_name = [prefix + "/" + x for x in metric_name]
-    metric_val = [acc, ap, precision, recall, f1, auc, dp, dpe, aucp, eopp, eoppe, eodd, eodde, prule, prulee, abcc, accp, ppv, bfp, bfn]
-
-    return dict(zip(metric_name, metric_val))
 
 
 
@@ -626,3 +635,4 @@ if __name__ == "__main__":
 
     print(predictive_parity_value(y_pred, y, s, threshold=0.5))
     print(predictive_parity_ref(y, y_pred, s))    
+

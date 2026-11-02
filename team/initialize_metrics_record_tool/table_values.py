@@ -3,7 +3,7 @@
 import math
 import re
 
-from team.eval_metrics_tool.eval_metrics.matcher import find_metrics, normalize_metric
+from team.eval_metrics_tool.eval_metrics.matcher import find_metrics, find_requested_metrics, normalize_metric
 from .evidence import _NUMBER, _Evidence, _context_features, _section_features
 
 _CELL = re.compile(rf'^\s*({_NUMBER})\s*%?(?:\s*(?:±|\+/-)\s*{_NUMBER}\s*%?)?\s*[*†‡]*\s*$')
@@ -30,7 +30,7 @@ def _crawl_tables(paper, wanted, weights, row_label):
             labels = {}
             values = {}
             for col, cell in enumerate(row):
-                matches = find_metrics(cell, context_given=True)
+                matches = find_requested_metrics(cell, wanted)
                 if len(matches) == 1:
                     labels[col] = matches[0].metric
                 number = _CELL.fullmatch(cell)
@@ -98,3 +98,4 @@ def _crawl_unruled_table_row(paper, wanted, weights, row_label):
                     evidence.append(_Evidence(metric, value, score, context,
                                               tuple(features)))
     return evidence
+

@@ -3,7 +3,7 @@
 import math
 import re
 
-from team.eval_metrics_tool.eval_metrics.matcher import find_metrics
+from team.eval_metrics_tool.eval_metrics.matcher import find_requested_metrics
 from .evidence import _NUMBER, _Evidence, _context_features, _section_features
 
 _NUMBERS = re.compile(rf'(?<![\w.])(?P<value>{_NUMBER})(?!\w|\.\d)\s*(?P<percent>%)?')
@@ -20,7 +20,7 @@ def _crawl_text(paper, wanted, weights, window):
         for sentence in _SENTENCE_BREAK.split(section.text):
             # Joining line wraps lets indirect wording span PDF lines.
             text = ' '.join(sentence.split())
-            mentions = find_metrics(text, context_given=True)
+            mentions = find_requested_metrics(text, wanted)
             numbers = [n for n in _NUMBERS.finditer(text)
                        if not any(n.start() < m.end and n.end() > m.start
                                   for m in mentions)]
@@ -66,3 +66,4 @@ def _crawl_text(paper, wanted, weights, window):
                 evidence.append(_Evidence(mention.metric, value, score, text,
                                           tuple(['proximity'] + features)))
     return evidence
+

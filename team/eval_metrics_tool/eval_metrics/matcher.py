@@ -77,3 +77,20 @@ def normalize_metric(name: str) -> str | None:
     if len(matches) == 1 and matches[0].start == 0 and matches[0].end == len(s):
         return matches[0].metric
     return None
+
+
+
+def find_requested_metrics(text: str, wanted) -> list[Match]:
+    """Match known aliases plus exact custom names explicitly requested by callers."""
+    matches = find_metrics(text, context_given=True)
+    for name in wanted:
+        if normalize_metric(name):
+            continue
+        tokens = name.strip().split()
+        if not tokens:
+            continue
+        pattern = r"(?<!\w)" + r"\s+".join(map(re.escape, tokens)) + r"(?!\w)"
+        for found in re.finditer(pattern, text, re.I):
+            if not any(found.start() < m.end and found.end() > m.start for m in matches):
+                matches.append(Match(name, found.start(), found.end(), found.group()))
+    return sorted(matches, key=lambda m: m.start)

@@ -21,14 +21,11 @@ def clear_lines(lines):
 
 def print_metrics(metrics_dict, metrics_print = "ap,dp", train=True):
 
-    output = []
-    for metric in metrics_print.split(","):
-        if train == True:
-            output.append( "{:0>2.2f}|{:0>2.2f}|{:0>2.2f}".format(metrics_dict["train/"+metric], metrics_dict["val/"+metric], metrics_dict["test/"+metric]) )
-        else:
-            output.append( "{:0>2.2f}|{:0>2.2f}".format(metrics_dict["val/"+metric], metrics_dict["test/"+metric]) )
-    
-    return tuple(output)
+    def display(value):
+        return "NA" if value is None else "{:0>2.2f}".format(value)
+    prefixes = ("train", "val", "test") if train else ("val", "test")
+    return tuple("|".join(display(metrics_dict[prefix + "/" + metric]) for prefix in prefixes)
+                 for metric in metrics_print.split(","))
 
 
 
@@ -84,3 +81,4 @@ def save_checkpoint(dir, epoch, name="checkpoint", **kwargs):
 #     ax.set_xlim(0, 1)
 #     fig.tight_layout()
 #     return fig
+

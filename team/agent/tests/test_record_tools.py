@@ -61,10 +61,11 @@ class RecordToolsTests(unittest.TestCase):
         kwargs = create_agent.call_args.kwargs
         self.assertIs(kwargs["model"], fake_model)
         self.assertEqual([item.name for item in kwargs["tools"]], [
-            "list_reproduction_scripts", "find_eval_metrics", "show_current_record", "update_metric",
+            "list_reproduction_scripts", "find_eval_metrics", "show_current_record", "update_metric", "initialize_current_record",
         ])
         self.assertIn("Never invent a metric value", kwargs["system_prompt"])
 
 
 if __name__ == "__main__":
     unittest.main()
+

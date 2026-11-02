@@ -77,7 +77,7 @@ def test(model, test_loader, criterion, device, prefix="test", args=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_path", type=str, default="../datasets/adult/raw", help="Path to the dataset folder")
+    parser.add_argument("--data_path", type=str, default=None, help="Path to the dataset folder")
     parser.add_argument("--dataset", type=str, default="adult", choices=["adult","kdd","acs","german", "compas" ,"bank_marketing"], help="Choose a dataset from the available options: adult, kdd, acs, german, compas, or bank_marketing")
     parser.add_argument("--model", type=str, default="erm", help="Model type")
     parser.add_argument("--target_attr", type=str, default="income", help="Target attribute for prediction")
@@ -96,6 +96,9 @@ if __name__ == "__main__":
     parser.add_argument("--wandb_project", type=str, default="fair_fairness_benchmark", help="Weights & Biases project name")
 
     args = parser.parse_args()
+    if args.data_path is None:
+        folder = "census_income_kdd" if args.dataset == "kdd" else args.dataset
+        args.data_path = f"../datasets/{folder}/raw"
     wandb.init(project=args.wandb_project, config=args)
 
     table = tabulate([(k, v) for k, v in vars(args).items()], tablefmt='grid')
@@ -108,26 +111,26 @@ if __name__ == "__main__":
 
     if args.dataset == "adult":
         print(f"Dataset: adult")
-        X, y, s = load_adult_data(path="../datasets/adult/raw", sensitive_attribute=args.sensitive_attr)
+        X, y, s = load_adult_data(path=args.data_path, sensitive_attribute=args.sensitive_attr)
 
     elif args.dataset == "german":
         print(f"Dataset: german")
-        X, y, s = load_german_data(path="../datasets/german/raw", sensitive_attribute=args.sensitive_attr)
+        X, y, s = load_german_data(path=args.data_path, sensitive_attribute=args.sensitive_attr)
 
     elif args.dataset == "kdd":
         print(f"Dataset: kdd")
-        X, y, s = load_census_income_kdd_data("../datasets/census_income_kdd/raw", sensitive_attribute=args.sensitive_attr)
+        X, y, s = load_census_income_kdd_data(args.data_path, sensitive_attribute=args.sensitive_attr)
 
     elif args.dataset == "compas":
         print(f"Dataset: compas")
-        X, y, s = load_compas_data(path="../datasets/compas/raw", sensitive_attribute=args.sensitive_attr)
+        X, y, s = load_compas_data(path=args.data_path, sensitive_attribute=args.sensitive_attr)
 
     elif args.dataset == "bank_marketing":
         print(f"Dataset: bank_marketing")
-        X, y, s = load_bank_marketing_data(path="../datasets/bank_marketing/raw", sensitive_attribute=args.sensitive_attr)
+        X, y, s = load_bank_marketing_data(path=args.data_path, sensitive_attribute=args.sensitive_attr)
 
     elif args.dataset == "acs":
-        X, y, s = load_acs_data( path= "../datasets/acs/raw", target_attr=args.target_attr, sensitive_attribute=args.sensitive_attr)
+        X, y, s = load_acs_data( path=args.data_path, target_attr=args.target_attr, sensitive_attribute=args.sensitive_attr)
 
     else:
         raise ValueError(f"Unknown dataset: {args.dataset}")

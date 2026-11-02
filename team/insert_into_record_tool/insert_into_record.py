@@ -2,6 +2,8 @@
 
 import json
 import math
+import os
+import tempfile
 from pathlib import Path
 
 
@@ -46,10 +48,25 @@ class MetricsRecord:
         """Save the record without accidentally overwriting an existing file."""
         path = Path(file_path)
 
-        mode = "w" if overwrite else "x"
-
-        with path.open(mode, encoding="utf-8") as file:
-            json.dump(self.record, file, indent=4, allow_nan=False)
+        # Finish serialization before touching the destination; an interrupted
+        # temporary write leaves the last complete record available to readers.
+        payload = json.dumps(self.record, indent=4, allow_nan=False)
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8",
+                                             dir=path.parent, delete=False) as stream:
+                temporary = Path(stream.name)
+                stream.write(payload)
+                stream.flush()
+                os.fsync(stream.fileno())
+            if overwrite:
+                os.replace(temporary, path)
+            else:
+                # Atomic create-if-absent: do not race a separate exists check.
+                os.link(temporary, path)
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
 
     @classmethod
     def load_json(cls, file_path: str):
@@ -68,3 +85,4 @@ def update_record_file(file_path: str | Path, metric: str, value: float | int) -
     record.insert_into_record(metric, value)
     record.save_json(file_path, overwrite=True)
     return record
+
