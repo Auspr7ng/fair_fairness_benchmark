@@ -2,6 +2,8 @@
 
 This repository organizes the published [Fair Fairness Benchmark (FFB)](https://github.com/ahxt/fair_fairness_benchmark) code alongside our group's reproduction work and supporting tools. The original benchmark is a framework for evaluating in-processing group fairness methods. Our work here is an extension and organization of that code, not a claim that we reproduced every result in the paper.
 
+Last updated: November 2, 2026. Team 2 focuses on paper-analysis tools for a planned Landseer integration; FFB is the local development and demonstration setting.
+
 ## Progress at a glance
 
 | Workstream | What is in the repository | Current status |
@@ -11,7 +13,10 @@ This repository organizes the published [Fair Fairness Benchmark (FFB)](https://
 | PDF evaluation-metric extractor | [`team/eval_metrics_tool/`](team/eval_metrics_tool/) | Lists a paper's metrics with a user-configured LLM (any LiteLLM provider), falling back to rule-based PDF text/table extraction, metric matching, and ranking. Scanned PDFs and some table layouts remain unsupported. |
 | Metric record initializer | [`team/initialize_metrics_record_tool/`](team/initialize_metrics_record_tool/) | Extracts reported values into a metric-to-value record. Ambiguous or missing values remain empty for review. |
 | Metric record updater | [`team/insert_into_record_tool/`](team/insert_into_record_tool/) | Validates updates to an initialized record and saves the selected record as JSON. |
-| Local repository agent | [`team/agent/`](team/agent/) | A basic Ollama/LangChain agent can list the available reproduction scripts, list a paper's evaluation metrics, and read or update a selected metric record. It is not yet an automated experiment runner. |
+| Local repository agent | [`team/agent/`](team/agent/) | A basic Ollama/LangChain agent can list the available reproduction scripts, list a paper's evaluation metrics, and read or update a selected metric record. It can also initialize the selected record when explicitly requested. It is not yet an automated experiment runner. |
+
+| Paper-to-record pipeline | [`team/paper_pipeline.py`](team/paper_pipeline.py) | Connects metric selection and value initialization to persisted JSON without an agent server; reports unresolved values and selection source. |
+| Team 2 poster | [`poster/main.tex`](poster/main.tex) and [build/evidence notes](poster/README.md) | Purdue-themed working draft covering our three tools and cross-team roles. Five extracted metric names are a team-reported preliminary demonstration, not an accuracy score. |
 
 ## Repository map
 
@@ -19,6 +24,8 @@ This repository organizes the published [Fair Fairness Benchmark (FFB)](https://
 .
 ├── README.md                     Project status and entry points
 ├── LICENSE                       MIT license inherited from FFB
+├── PIPELINE_BLOCKERS.md           Pipeline fixes, prerequisites, and limitations
+├── poster/                       Team 2 LaTeX poster draft and build notes
 ├── ffb/                          Published FFB code and our reproduction work
 │   ├── src/                      Original model, training, and metric code
 │   ├── benchmark/                Original benchmark helper
@@ -29,6 +36,7 @@ This repository organizes the published [Fair Fairness Benchmark (FFB)](https://
 │   ├── requirements.txt          Original FFB dependency list
 │   └── readme.md                 Original FFB documentation and historical logs
 └── team/                         Group-built supporting tools
+    ├── paper_pipeline.py         Paper-to-JSON entry point
     ├── agent/                    Local repository agent
     ├── eval_metrics_tool/        PDF evaluation-metric extractor
     ├── initialize_metrics_record_tool/  Paper-reported metric values
@@ -44,6 +52,10 @@ The code in `ffb/src/`, `ffb/benchmark/`, `ffb/datasets/`, `ffb/tutorial/`, and 
 | Sep 20–21, 2026 | [CelebA runners](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/b1c24bbae4e37feafde39fdf1d2eecc565d4a9f7) and [directory organization](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/7b2e45121c2cc10fc146e57f140fd82b22156e77) | Yuchao added the partial ResNet reproduction scripts. |
 | Sep 21, 2026 | [Local agent](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/8ae3588d3b0790a388022c9aa760f9c3b6173d23) and [instructions](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/b5877e2b480ea0e3abb132c60b95afdc20d18216) | Aarush added the Ollama/LangChain demonstration agent. |
 | Oct 4, 2026 | [Metric extractor](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/044351ccfdc57b8c7ed4ea2d14d1b76baa7aef00) and [fairness metric patterns](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/c7b8cc8582231bc1c487d540b731f84a4c42f6ca) | Andrew added PDF extraction and expanded the metric dictionary. |
+| Oct 26, 2026 | [Shared tool logic](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/3efc8957cd63a62184de0f9452f2f51c3a254e53) | Consolidated record-update validation and extractor fallback behavior. |
+| Nov 2, 2026 | [Component organization](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/cf8060fc425deb821ecc797e243564858c969e12) and [section-selection fixes](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/46fe084fcd66bdd3f8e3b85449d3d8c64d9cd735) | Split extraction/initialization components, recover mixed-column experiment headings, and surface empty model-output warnings. |
+| Nov 2, 2026 | [Pipeline fixes](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/87a5b301c5aca2775e9d210042a21a07fc038493) and [limitations](PIPELINE_BLOCKERS.md) | Added offline paper-to-record persistence, selected-record initialization, atomic JSON writes, nullable metric handling, and training-launch checks. Commit validation reports 158 tests and 19 subtests; live inference and full torch training were unavailable. |
+| Nov 2, 2026 | [Poster draft](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/dd65842a8362394e75424670299b623327188185) | Added Team 2's Purdue LaTeX draft, cross-team context, build instructions, and generated-file exclusions. Desktop LaTeX compilation passed; author details and demonstration evidence remain to be finalized. |
 
 ## Try the current work
 
@@ -85,6 +97,14 @@ python -m team.initialize_metrics_record_tool /path/to/FFB.pdf --metric Accuracy
 
 This returns JSON with one reported value per metric where the paper gives a clear value. Use `--metric` to choose names or `--row-label` to select a model row in a table. See the [tool README](team/initialize_metrics_record_tool/README.md) for the Python API and limitations.
 
+### Run the paper-to-record pipeline
+
+```bash
+python -m team.paper_pipeline /path/to/paper.pdf --output results/paper-record.json --no-llm
+```
+
+This offline route needs the extractor dependencies but no running agent server. It saves metric values as JSON and returns selection provenance and unresolved fields separately. Existing output files require explicit `--overwrite`. Value selection is heuristic and needs review. See [pipeline notes](PIPELINE_BLOCKERS.md) for prerequisites and remaining limitations.
+
 ### Update a metric record
 
 ```bash
@@ -105,6 +125,10 @@ python team/agent/basic_agent.py
 ```
 
 By default the agent answers one demonstration question by calling a tool that lists files in `ffb/reproduce/`. Pass `--prompt` to ask which metrics a paper PDF reports, or `--record` to work with a metric record. See its [README](team/agent/README.md) for the recommended virtual environment setup.
+
+## Documentation updates
+
+For each project update, revise the affected component README and keep this overview's status, usage, and repository map consistent. Append a dated development milestone with a commit or file link and the relevant validation evidence. Keep earlier milestones, distinguish implemented functionality from planned work, and label upstream results and team demonstrations accurately. Poster-specific evidence and unfinished submission details belong in [`poster/README.md`](poster/README.md).
 
 ## Attribution
 
