@@ -1,0 +1,227 @@
+% Unofficial Purdue University Poster Template
+% based on
+% https://github.com/k4rtik/uchicago-poster
+% a fork of https://github.com/anishathalye/gemini
+
+\documentclass[final]{beamer}
+
+% ====================
+% Packages
+% ====================
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[size=custom,width=120,height=72,scale=1.0]{beamerposter}
+% Self-contained Purdue-inspired theme; no external Gemini files required.
+\definecolor{PurdueGold}{HTML}{CFB991}
+\definecolor{PurdueBlack}{HTML}{000000}
+\definecolor{PurdueLight}{HTML}{F5F1E9}
+\setbeamercolor{normal text}{fg=PurdueBlack,bg=white}
+\setbeamercolor{headline}{fg=white,bg=PurdueBlack}
+\setbeamercolor{footline}{fg=PurdueBlack,bg=PurdueGold}
+\setbeamercolor{block title}{fg=PurdueBlack,bg=white}
+\setbeamercolor{block body}{fg=PurdueBlack,bg=white}
+\setbeamercolor{block title alerted}{fg=PurdueBlack,bg=PurdueGold}
+\setbeamercolor{block body alerted}{fg=PurdueBlack,bg=PurdueLight}
+\setbeamercolor{block title example}{fg=PurdueBlack,bg=PurdueGold}
+\setbeamercolor{block body example}{fg=PurdueBlack,bg=PurdueLight}
+\setbeamercolor{itemize item}{fg=PurdueBlack}
+\setbeamercolor{itemize subitem}{fg=PurdueBlack}
+\setbeamercolor{enumerate item}{fg=PurdueBlack}
+\setbeamerfont{title}{size=\fontsize{64}{72}\selectfont,series=\bfseries}
+\setbeamerfont{author}{size=\fontsize{32}{40}\selectfont}
+\setbeamerfont{institute}{size=\fontsize{28}{36}\selectfont}
+\setbeamerfont{block title}{size=\fontsize{34}{40}\selectfont,series=\bfseries}
+\setbeamerfont{block title alerted}{parent=block title}
+\setbeamerfont{block title example}{parent=block title}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{blocks}[default]
+\newcommand{\heading}[1]{\par\medskip{\bfseries #1}\par\smallskip}
+\newcommand{\footercontent}[1]{\def\posterfooter{#1}}
+\setbeamertemplate{headline}{%
+  \begin{beamercolorbox}[wd=\paperwidth,sep=1.5cm,center]{headline}
+    {\fontsize{30}{36}\selectfont\bfseries\color{PurdueGold}PURDUE UNIVERSITY\par}
+    \vskip0.6cm
+    {\usebeamerfont{title}\inserttitle\par}
+    \vskip0.6cm
+    {\usebeamerfont{author}\insertauthor\par}
+    \vskip0.4cm
+    {\usebeamerfont{institute}\insertinstitute\par}
+  \end{beamercolorbox}
+  {\color{PurdueGold}\rule{\paperwidth}{0.35cm}}
+  \vskip0.8cm
+}
+\setbeamertemplate{footline}{%
+  \begin{beamercolorbox}[wd=\paperwidth,sep=0.7cm]{footline}
+    \fontsize{22}{28}\selectfont\posterfooter
+  \end{beamercolorbox}
+}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{doi}
+\usepackage[numbers]{natbib}
+\usepackage[patch=none]{microtype}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{anyfontsize}
+
+\pdfstringdefDisableCommands{%
+\def\translate#1{#1}%
+}
+
+% ====================
+% Lengths
+% ====================
+
+% If you have N columns, choose \sepwidth and \colwidth such that
+% (N+1)*\sepwidth + N*\colwidth = \paperwidth
+\newlength{\sepwidth}
+\newlength{\colwidth}
+\setlength{\sepwidth}{0.025\paperwidth}
+\setlength{\colwidth}{0.3\paperwidth}
+
+\newcommand{\separatorcolumn}{\begin{column}{\sepwidth}\end{column}}
+
+
+% Draft based on user-provided project abstract and repository code at
+% 87a5b301c5aca2775e9d210042a21a07fc038493 (2026-11-02).
+% Five-metric demonstration is supplied by the team; no accuracy claim is implied.
+% TODO: Confirm title, complete author list, venue, demonstration PDF and metric names.
+% Cross-team roles: user-shared Landseer Agent Tools.xlsx, team 1--4 sheets.
+\title{Toward Agentic Paper Analysis\\for Defense Reproduction}
+\author{Team 2}
+\institute{Purdue University}
+\footercontent{\href{https://github.com/Auspr7ng/fair_fairness_benchmark}{github.com/Auspr7ng/fair\_fairness\_benchmark}\hfill Working draft \enspace | \enspace November 2026}
+\setbeamercolor{caption name}{fg=PurdueBlack}
+\setbeamerfont{block body}{size=\fontsize{27}{34}\selectfont}
+\setbeamerfont{block body alerted}{parent=block body}
+\setbeamerfont{block body example}{parent=block body}
+\setlength{\parskip}{0.45em}
+\begin{document}
+\begin{frame}[t]
+\begin{columns}[t]
+\separatorcolumn
+\begin{column}{\colwidth}
+
+\begin{block}{1 \enspace Motivation}
+Real-world machine learning systems may need to satisfy \textbf{privacy, robustness, and fairness} together. Defenses designed for individual guarantees can interact and change their combined effects.
+
+\textbf{Landseer} is an empirical framework for studying these interactions. Evaluating existing defenses requires onboarding diverse tools and connecting published results to reproducible experiments.
+
+Our goal is to automate the \textbf{paper-analysis portion} of this process: identify what a paper measures, organize its reported values, and prepare reference records for later comparison.
+\end{block}
+\vspace{0.7cm}
+
+\begin{alertblock}{Research question}
+How can an agentic workflow turn research papers into structured reference records that support defense reproduction and validation?
+\end{alertblock}
+\vspace{0.7cm}
+
+\begin{block}{2 \enspace Team 2: paper-analysis tools}
+\begin{itemize}
+\item \textbf{Metric extractor:} identify evaluation metric names from research papers.
+\item \textbf{Record initializer:} structure paper-reported numerical values into metric records.
+\item \textbf{Insertion tool:} validate metric names and numerical updates, with JSON storage.
+\end{itemize}
+
+We use the \textbf{Fair Fairness Benchmark (FFB)} repository as a local development and demonstration setting. The original FFB benchmark and published results are prior work~[1]; our contribution is the supporting paper-analysis workflow~[2].
+\end{block}
+\vspace{0.7cm}
+
+\begin{block}{Where Team 2 fits in Landseer}
+The shared tool inventory~[3] describes complementary workstreams:
+\begin{itemize}
+\item \textbf{Team 1 --- environment preparation:} inspect repositories, generate Dockerfiles, build images, and provision containers.
+\item \textbf{Team 2 --- paper reference records:} extract metrics, initialize values, and validate record updates.
+\item \textbf{Team 3 --- repository adaptation:} clone code, identify supported datasets, and add model support.
+\item \textbf{Team 4 --- reproduction and validation:} run containers, extract reproduced metrics, and compare them with recorded values.
+\end{itemize}
+These are documented tool roles; a jointly validated end-to-end integration remains future work.
+\end{block}
+\end{column}
+\separatorcolumn
+\begin{column}{\colwidth}
+
+\begin{block}{3 \enspace Team 2 workflow and handoff}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+\tikzset{stage/.style={draw=PurdueBlack,fill=PurdueLight,line width=1.4pt,text width=27cm,align=center,inner sep=0.45cm,font=\large},flow/.style={->,line width=2pt}}
+\node[stage] (paper) at (0,0) {\textbf{Research paper PDF}\\Published methods and evaluation results};
+\node[stage] (extract) at (0,-3.7) {\textbf{Extractor}\\Identify and rank evaluation metric names};
+\node[stage] (init) at (0,-7.4) {\textbf{Initializer}\\Find reported values; optionally select a table row};
+\node[stage] (record) at (0,-11.1) {\textbf{Insertion tool + JSON record}\\Validate and persist reviewed metric updates};
+\node[stage,fill=PurdueGold] (future) at (0,-14.8) {\textbf{Planned handoff to reproduction / validation}\\Team 4 compares reproduced metrics with reference values};
+\draw[flow] (paper)--(extract);
+\draw[flow] (extract)--(init);
+\draw[flow] (init)--(record);
+\draw[flow,dashed] (record)--(future);
+\end{tikzpicture}
+\end{center}
+\end{block}
+\vspace{0.5cm}
+
+\begin{block}{4 \enspace Tool design}
+\heading{Identify metrics}
+PDF text and table extraction feed an LLM-assisted selector, with a dictionary-based fallback when the model is unavailable or fails. The output reports which path supplied the names.
+
+\heading{Initialize reference values}
+The initializer ranks candidate values using text proximity, table alignment, and other heuristic evidence. A selected table row can restrict the search when a metric has several reported values. Unresolved values remain \texttt{null}.
+
+\heading{Review and update}
+The insertion tool updates an existing metric, checks its name and finite numerical value, and supports JSON loading and saving. It manages records rather than calculating evaluation metrics. The agent's record tools are bound to a selected file; an offline command also connects extraction to JSON initialization~[2].
+\end{block}
+\end{column}
+\separatorcolumn
+\begin{column}{\colwidth}
+
+\begin{block}{5 \enspace Preliminary demonstration}
+\begin{beamercolorbox}[sep=0.6cm,center]{block body alerted}
+{\fontsize{74}{80}\selectfont\bfseries 5}\par
+\textbf{evaluation metric names identified}\par
+in a local FFB demonstration
+\end{beamercolorbox}
+
+This team-reported demonstration establishes preliminary \textbf{metric-extraction functionality}. It does not yet measure extraction accuracy, value correctness, or end-to-end reproduction success.
+
+Further evaluation will check extracted names against manually annotated paper evidence.
+\end{block}
+\vspace{0.6cm}
+
+\begin{block}{6 \enspace Current status and limitations}
+\begin{itemize}
+\item Three tools and local agent interfaces are implemented in the repository.
+\item Selected-row targeting is supported; complete dataset, model, and row provenance remains future work.
+\item PDF layouts, repeated results, and heuristic value selection still require human review.
+\item Live agent performance and a complete Landseer defense-reproduction workflow remain to be evaluated.
+\end{itemize}
+\end{block}
+\vspace{0.6cm}
+
+\begin{alertblock}{7 \enspace Next steps}
+\begin{enumerate}
+\item Build a manually annotated set of metrics, values, and source locations across papers.
+\item Evaluate metric precision/recall, value correctness, and experimental-context matching.
+\item Connect Team 2 records with the other teams' environment, adaptation, and validation tools; evaluate the integrated Landseer workflow.
+\end{enumerate}
+\end{alertblock}
+\vspace{0.6cm}
+
+\begin{block}{Takeaway}
+Structured paper analysis is a first step toward automating defense evaluation. Our current prototype connects metric discovery and record management; reproducible comparison is the next milestone.
+\end{block}
+\vspace{0.3cm}
+
+\begin{block}{References}
+{\fontsize{21}{27}\selectfont
+[1] Han et al. \emph{FFB: A Fair Fairness Benchmark for In-Processing Group Fairness Methods}. ICLR 2024. \href{https://arxiv.org/abs/2306.09468}{arXiv:2306.09468}.\par
+[2] Team repository, code snapshot \texttt{87a5b30}, Nov. 2, 2026. \href{https://github.com/Auspr7ng/fair_fairness_benchmark}{Auspr7ng/fair\_fairness\_benchmark}.\par
+[3] \emph{Landseer Agent Tools}, shared project workbook, worksheets ``team 1''--``team 4'', accessed Nov. 2, 2026.\par
+}
+\end{block}
+\end{column}
+\separatorcolumn
+\end{columns}
+\end{frame}
+\end{document}
