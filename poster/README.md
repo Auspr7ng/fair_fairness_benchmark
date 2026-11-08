@@ -19,7 +19,7 @@ The output is `build/main.pdf`. Generated PDFs and compiler files are ignored.
 - Team 2: metric extraction, reference-value initialization, and validated JSON record updates.
 - Cross-team context follows the shared *Landseer Agent Tools* workbook: Team 1 environment preparation, Team 3 repository/model adaptation, Team 4 reproduction and validation.
 - Implementation descriptions were checked against repository snapshot `87a5b301c5aca2775e9d210042a21a07fc038493` (November 2, 2026).
-- The five-metric local demonstration comes from the team-provided abstract. It is preliminary functionality evidence, not an extraction-accuracy score.
+- The current basic-validation statement is user-reported: extracted metric information matches the corresponding content in all four instructor-provided PDFs. This editing pass did not independently rerun that validation.
 - Landseer integration and end-to-end validation are future work.
 
 ## Before final submission
@@ -68,3 +68,7 @@ Retained both diagrams: the left column shows Team 2's paper-to-record operation
 ### Diagram spacing fix (November 8, 2026)
 
 Changed the four-team diagram to place Team 1 relative to Team 3’s bottom edge, with an explicit gap. Team 4 is positioned below Team 1 with a separate corridor for the execution-environment label. This prevents node and label overlaps when text wraps.
+
+### Basic-validation wording (November 8, 2026)
+
+At the user’s request, replaced the five-metric demonstration panel with a concise basic-validation statement covering the four instructor-provided PDFs. The status is supplied by the user; no new accuracy percentage or end-to-end reproduction result is claimed. This supersedes the older five-name panel described in earlier entries.
