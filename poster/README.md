@@ -24,7 +24,7 @@ The output is `build/main.pdf`. Generated PDFs and compiler files are ignored.
 
 ## Before final submission
 
-Confirm the complete author list, title, venue, and Landseer citation. Add the demonstration PDF/version, exact metric names, extraction mode, and manually checked output. Replace preliminary statements with evaluated results when available.
+Confirm the title, venue, and Landseer citation. Add the demonstration PDF/version, exact metric names, extraction mode, and manually checked output. Replace preliminary statements with evaluated results when available.
 
 ## Template attribution
 
@@ -34,3 +34,7 @@ Purdue colors: black and Boilermaker Gold (`#CFB991`).
 ## November 8, 2026 update
 
 Replaced the text-only header with Purdue’s official horizontal logo for a dark background. `images/purdue-logo.svg` is the unmodified source from https://www.purdue.edu/purdue/images/logo.svg; `images/purdue-logo.png` is the high-resolution rendering used by LaTeX. Keep both image files with the source.
+
+### Repository review and authors
+
+Checked `origin/master` on November 8, 2026: no commits beyond `83ad893` before this update, so no new implementation or experiment results were added to the poster. The author line now follows the user-supplied Team 2 screenshot order: Aarush Kumar, Andrew Zeng, Benjamin Taylor, Bhanu Adaveni, Rudra Vaishnav, and Yuchao Shen. Existing preliminary-result and future-integration qualifications are retained.

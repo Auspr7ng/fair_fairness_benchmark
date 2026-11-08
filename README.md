@@ -59,6 +59,8 @@ The code in `ffb/src/`, `ffb/benchmark/`, `ffb/datasets/`, `ffb/tutorial/`, and 
 
 | Nov 8, 2026 | [Poster source](poster/main.tex) and [logo assets](poster/images/) | Replaced the text-only poster header with Purdue’s official horizontal logo; retained source SVG and LaTeX-ready PNG. |
 
+| Nov 8, 2026 | [Poster author line](poster/main.tex) and [review notes](poster/README.md) | Checked GitHub for new updates (none beyond the logo commit) and added the six Team 2 members from the supplied roster. No new experiment-result claims. |
+
 ## Try the current work
 
 Run the following commands from the repository root. Each component has its own requirements; the data and Ollama model are not included in the repository.
