@@ -111,7 +111,7 @@ Real-world machine learning systems may need to satisfy \textbf{privacy, robustn
 
 \textbf{Landseer} is an empirical framework for studying these interactions. Evaluating existing defenses requires onboarding diverse tools and connecting published results to reproducible experiments.
 
-Our goal is to automate the \textbf{paper-analysis portion} of this process: identify what a paper measures, organize its reported values, and prepare reference records for later comparison.
+Different defenses start with different code, models, and datasets. The project therefore targets a common ResNet-20 backbone, using CIFAR-10 for other tools and CelebA for fairness~[4]. Our role is to turn paper-reported metrics into reference records for this comparison.
 \end{block}
 \vspace{0.7cm}
 
@@ -134,12 +134,12 @@ We use the \textbf{Fair Fairness Benchmark (FFB)} repository as a local developm
 \begin{block}{Where Team 2 fits in Landseer}
 The shared tool inventory~[3] describes complementary workstreams:
 \begin{itemize}
-\item \textbf{Team 1 --- environment preparation:} inspect repositories, generate Dockerfiles, build images, and provision containers.
-\item \textbf{Team 2 --- paper reference records:} extract metrics, initialize values, and validate record updates.
-\item \textbf{Team 3 --- repository adaptation:} clone code, identify supported datasets, and add model support.
-\item \textbf{Team 4 --- reproduction and validation:} run containers, extract reproduced metrics, and compare them with recorded values.
+\item \textbf{Team 1 (IPMix):} environment preparation, repository inspection, Dockerfiles, images, and containers.
+\item \textbf{Team 2 (FFB):} paper reference records: extract metrics, initialize values, and validate updates.
+\item \textbf{Team 3 (EP/BNP):} repository adaptation, dataset discovery, and model support.
+\item \textbf{Team 4 (UAP):} reproduction and validation: run containers, extract metrics, and compare against records.
 \end{itemize}
-These are documented tool roles; a jointly validated end-to-end integration remains future work.
+These paper assignments~[4] and tool roles~[3] define complementary workstreams. Dockerfiles were shared on Nov. 2; successful integrated builds and runs still need verification.
 \end{block}
 \end{column}
 \separatorcolumn
@@ -153,7 +153,7 @@ These are documented tool roles; a jointly validated end-to-end integration rema
 \node[stage] (extract) at (0,-3.7) {\textbf{Extractor}\\Identify and rank evaluation metric names};
 \node[stage] (init) at (0,-7.4) {\textbf{Initializer}\\Find reported values; optionally select a table row};
 \node[stage] (record) at (0,-11.1) {\textbf{Insertion tool + JSON record}\\Validate and persist reviewed metric updates};
-\node[stage,fill=PurdueGold] (future) at (0,-14.8) {\textbf{Planned handoff to reproduction / validation}\\Team 4 compares reproduced metrics with reference values};
+\node[stage,fill=PurdueGold] (future) at (0,-14.8) {\textbf{Planned handoff to Team 4}\\Align metric, dataset, model, and scale before comparison};
 \draw[flow] (paper)--(extract);
 \draw[flow] (extract)--(init);
 \draw[flow] (init)--(record);
@@ -186,7 +186,7 @@ in a local FFB demonstration
 
 This team-reported demonstration establishes preliminary \textbf{metric-extraction functionality}. It does not yet measure extraction accuracy, value correctness, or end-to-end reproduction success.
 
-Further evaluation will check extracted names against manually annotated paper evidence.
+\textbf{Additional team-reported milestone:} a local Qwen/Ollama agent called the reproduction-script listing tool successfully (Sept. 21). This verifies a basic tool call, not the full paper-to-experiment workflow.
 \end{block}
 \vspace{0.6cm}
 
@@ -209,8 +209,10 @@ Further evaluation will check extracted names against manually annotated paper e
 \end{alertblock}
 \vspace{0.6cm}
 
-\begin{block}{Takeaway}
-Structured paper analysis is a first step toward automating defense evaluation. Our current prototype connects metric discovery and record management; reproducible comparison is the next milestone.
+\begin{block}{FFB case study: comparison plan}
+The repository contains ERM and DiffDP runners for ResNet-18/20 on CelebA. For the common ResNet-20 target, compare predictive performance and group fairness under matched data splits, training budgets, and initialization.
+
+\textbf{A changed model or dataset changes the experiment.} Paper reference values guide validation; they are not automatically expected scores for the adapted setting. Completed CelebA comparison results are not yet committed.
 \end{block}
 \vspace{0.3cm}
 
@@ -218,7 +220,8 @@ Structured paper analysis is a first step toward automating defense evaluation. 
 {\fontsize{21}{27}\selectfont
 [1] Han et al. \emph{FFB: A Fair Fairness Benchmark for In-Processing Group Fairness Methods}. ICLR 2024. \href{https://arxiv.org/abs/2306.09468}{arXiv:2306.09468}.\par
 [2] Team repository, code snapshot \texttt{87a5b30}, Nov. 2, 2026. \href{https://github.com/Auspr7ng/fair_fairness_benchmark}{Auspr7ng/fair\_fairness\_benchmark}.\par
-[3] \emph{Landseer Agent Tools}, shared project workbook, worksheets ``team 1''--``team 4'', accessed Nov. 2, 2026.\par
+[3] \emph{Landseer Agent Tools}, shared project workbook, team worksheets.\par
+[4] Project Slack: \#fall26 assignments and model/data guidance (Aug.--Sept. 2026); Team 2 progress discussion (Sept. 2026).\par
 }
 \end{block}
 \end{column}

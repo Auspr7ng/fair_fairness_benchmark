@@ -38,3 +38,15 @@ Replaced the text-only header with Purdue’s official horizontal logo for a dar
 ### Repository review and authors
 
 Checked `origin/master` on November 8, 2026: no commits beyond `83ad893` before this update, so no new implementation or experiment results were added to the poster. The author line now follows the user-supplied Team 2 screenshot order: Aarush Kumar, Andrew Zeng, Benjamin Taylor, Bhanu Adaveni, Rudra Vaishnav, and Yuchao Shen. Existing preliminary-result and future-integration qualifications are retained.
+
+### Slack-informed clarification (November 8, 2026)
+
+Reviewed the project channel and the six-member Team 2 discussion. The poster now distinguishes assigned papers from shared tool responsibilities, explains the ResNet-20/CIFAR-10 common target and CelebA fairness exception, and adds the FFB comparison plan. The September 21 local Qwen tool-call success is explicitly a team-reported script-listing demonstration, not a verified paper-to-experiment run. November 2 Dockerfile shares are preparation evidence, not proof of successful builds. No private contact details or meeting credentials are included.
+
+Source pointers:
+- Project paper assignments: https://vip-tml.slack.com/archives/C0BT7TY1XB2/p1787606783549289
+- ResNet-20 direction: https://vip-tml.slack.com/archives/C0BT7TY1XB2/p1789061192160359
+- Dataset direction: https://vip-tml.slack.com/archives/C0BT7TY1XB2/p1789061224816559
+- FFB Dockerfile share: https://vip-tml.slack.com/archives/C0BT7TY1XB2/p1793652447771249
+
+The Team 2 discussion also reports an earlier code run and shares a reproduction report; the report was not inspected in this review, so no numerical reproduction results are claimed. A live end-to-end agent evaluation is still needed.
