@@ -2,7 +2,7 @@
 
 Purdue-themed LaTeX poster for **Toward Agentic Paper Analysis for Defense Reproduction**. Size: 120 × 72 cm, three columns.
 
-`main.tex` is the editable source and needs no external theme, logo, or bibliography files. The university name is typeset text, not an official logo.
+`main.tex` is the editable source and uses the bundled Purdue logo in `images/`; no external theme or bibliography files are required. The official logo retains its original proportions.
 
 ## Build
 
@@ -30,3 +30,7 @@ Confirm the complete author list, title, venue, and Landseer citation. Add the d
 
 Adapted from the supplied unofficial Georgia Tech/Gemini template, based on https://github.com/k4rtik/uchicago-poster and https://github.com/anishathalye/gemini.
 Purdue colors: black and Boilermaker Gold (`#CFB991`).
+
+## November 8, 2026 update
+
+Replaced the text-only header with Purdue’s official horizontal logo for a dark background. `images/purdue-logo.svg` is the unmodified source from https://www.purdue.edu/purdue/images/logo.svg; `images/purdue-logo.png` is the high-resolution rendering used by LaTeX. Keep both image files with the source.

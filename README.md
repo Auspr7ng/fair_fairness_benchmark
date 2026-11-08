@@ -2,7 +2,7 @@
 
 This repository organizes the published [Fair Fairness Benchmark (FFB)](https://github.com/ahxt/fair_fairness_benchmark) code alongside our group's reproduction work and supporting tools. The original benchmark is a framework for evaluating in-processing group fairness methods. Our work here is an extension and organization of that code, not a claim that we reproduced every result in the paper.
 
-Last updated: November 2, 2026. Team 2 focuses on paper-analysis tools for a planned Landseer integration; FFB is the local development and demonstration setting.
+Last updated: November 8, 2026. Team 2 focuses on paper-analysis tools for a planned Landseer integration; FFB is the local development and demonstration setting.
 
 ## Progress at a glance
 
@@ -56,6 +56,8 @@ The code in `ffb/src/`, `ffb/benchmark/`, `ffb/datasets/`, `ffb/tutorial/`, and 
 | Nov 2, 2026 | [Component organization](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/cf8060fc425deb821ecc797e243564858c969e12) and [section-selection fixes](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/46fe084fcd66bdd3f8e3b85449d3d8c64d9cd735) | Split extraction/initialization components, recover mixed-column experiment headings, and surface empty model-output warnings. |
 | Nov 2, 2026 | [Pipeline fixes](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/87a5b301c5aca2775e9d210042a21a07fc038493) and [limitations](PIPELINE_BLOCKERS.md) | Added offline paper-to-record persistence, selected-record initialization, atomic JSON writes, nullable metric handling, and training-launch checks. Commit validation reports 158 tests and 19 subtests; live inference and full torch training were unavailable. |
 | Nov 2, 2026 | [Poster draft](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/dd65842a8362394e75424670299b623327188185) | Added Team 2's Purdue LaTeX draft, cross-team context, build instructions, and generated-file exclusions. Desktop LaTeX compilation passed; author details and demonstration evidence remain to be finalized. |
+
+| Nov 8, 2026 | [Poster source](poster/main.tex) and [logo assets](poster/images/) | Replaced the text-only poster header with Purdue’s official horizontal logo; retained source SVG and LaTeX-ready PNG. |
 
 ## Try the current work
 
