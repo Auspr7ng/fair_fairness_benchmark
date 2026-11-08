@@ -64,3 +64,7 @@ Replaced the central paper-only flow with a four-team context diagram based on t
 ### Restore Team 2 detail diagram (November 8, 2026)
 
 Retained both diagrams: the left column shows Team 2's paper-to-record operations and the middle column shows four-team context. The detailed flow restores PDF → extractor → initializer → validated JSON record → future empirical validation. Replaced repetitive context prose to make room; dashed final handoff remains explicitly future work.
+
+### Diagram spacing fix (November 8, 2026)
+
+Changed the four-team diagram to place Team 1 relative to Team 3’s bottom edge, with an explicit gap. Team 4 is positioned below Team 1 with a separate corridor for the execution-environment label. This prevents node and label overlaps when text wraps.

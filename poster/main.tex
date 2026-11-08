@@ -158,14 +158,14 @@ We use the \textbf{Fair Fairness Benchmark (FFB)} repository as a local developm
 \begin{tikzpicture}[x=1cm,y=1cm]
 \tikzset{team/.style={draw=PurdueBlack,fill=PurdueLight,line width=1.5pt,text width=13cm,align=center,inner sep=0.55cm,font=\fontsize{25}{31}\selectfont},handoff/.style={->,dashed,line width=1.8pt},labeltext/.style={font=\fontsize{21}{26}\selectfont,align=center,fill=white,inner sep=0.2cm}}
 \node[team,text width=29cm] (input) at (0,0) {\textbf{Research paper + source repository}};
-\node[team,fill=PurdueGold,line width=2.5pt] (two) at (-8,-5.6) {\textbf{TEAM 2 --- OUR FOCUS}\\Paper reference records\\[0.25cm]Extract metric names\\Initialize reported values\\Validate updates; save JSON};
-\node[team] (three) at (8,-4) {\textbf{TEAM 3}\\Repository / model adaptation\\[0.2cm]Clone repositories\\Identify datasets; add models};
-\node[team] (one) at (8,-9.4) {\textbf{TEAM 1}\\Environment preparation\\[0.2cm]Inspect dependencies\\Generate Dockerfiles\\Build / provision containers};
-\node[team,text width=29cm] (four) at (0,-15.5) {\textbf{TEAM 4 --- REPRODUCE + VALIDATE}\\Run experiments; extract reproduced metrics\\Compare with paper reference values};
+\node[team,fill=PurdueGold,line width=2.5pt,anchor=north] (two) at (-8,-3) {\textbf{TEAM 2 --- OUR FOCUS}\\Paper reference records\\[0.25cm]Extract metric names\\Initialize reported values\\Validate updates; save JSON};
+\node[team,anchor=north] (three) at (8,-3) {\textbf{TEAM 3}\\Repository / model adaptation\\[0.2cm]Clone repositories\\Identify datasets; add models};
+\node[team,anchor=north] (one) at ([yshift=-1.2cm]three.south) {\textbf{TEAM 1}\\Environment preparation\\[0.2cm]Inspect dependencies\\Generate Dockerfiles\\Build / provision containers};
+\node[team,text width=29cm,anchor=north] (four) at ([xshift=-8cm,yshift=-3.6cm]one.south) {\textbf{TEAM 4 --- REPRODUCE + VALIDATE}\\Run experiments; extract reproduced metrics\\Compare with paper reference values};
 \draw[handoff] (input.south) -- ++(0,-0.8) -| (two.north);
 \draw[handoff] (input.south) -- ++(0,-0.8) -| (three.north);
 \draw[handoff] (three.south)--(one.north);
-\draw[handoff] (two.south)--(-8,-12.7) node[labeltext,midway] {Reference\\records}--(four.north -| two.south);
+\draw[handoff] (two.south)--(four.north -| two.south) node[labeltext,midway] {Reference\\records};
 \draw[handoff] (one.south)--(four.north -| one.south) node[labeltext,midway] {Execution\\environment};
 \end{tikzpicture}
 \end{center}
