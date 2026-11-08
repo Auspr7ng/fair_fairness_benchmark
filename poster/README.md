@@ -1,6 +1,6 @@
 # Team 2 poster draft
 
-Purdue-themed LaTeX poster for **Toward Agentic Paper Analysis for Defense Reproduction**. Size: 120 × 72 cm, three columns.
+Purdue-themed LaTeX poster for **Agentic Onboarding Tools for Empirical Evaluation of Machine Learning Defenses**. Size: 120 × 72 cm, three columns.
 
 `main.tex` is the editable source and uses the bundled Purdue logo in `images/`; no external theme or bibliography files are required. The official logo retains its original proportions.
 
@@ -24,7 +24,7 @@ The output is `build/main.pdf`. Generated PDFs and compiler files are ignored.
 
 ## Before final submission
 
-Confirm the title, venue, and Landseer citation. Add the demonstration PDF/version, exact metric names, extraction mode, and manually checked output. Replace preliminary statements with evaluated results when available.
+Confirm the venue and Landseer citation. Add the demonstration PDF/version, exact metric names, extraction mode, and manually checked output. Replace preliminary statements with evaluated results when available.
 
 ## Template attribution
 
@@ -50,3 +50,9 @@ Source pointers:
 - FFB Dockerfile share: https://vip-tml.slack.com/archives/C0BT7TY1XB2/p1793652447771249
 
 The Team 2 discussion also reports an earlier code run and shares a reproduction report; the report was not inspected in this review, so no numerical reproduction results are claimed. A live end-to-end agent evaluation is still needed.
+
+### Abstract alignment (November 8, 2026)
+
+Reframed the title and motivation around agentic onboarding for empirical ML defense evaluation. The narrative now proceeds from simultaneous privacy/robustness/fairness guarantees to defense interactions, onboarding difficulty, and Team 2's three paper-analysis operations. Each tool has explicit inputs and outputs. Cross-team assignments, Dockerfile progress, and model/data adaptation plans were compressed out of the poster's main narrative; Landseer remains a framework under development and planned integration target. The five-name demonstration is retained as preliminary functionality evidence. No complete integration, extraction-accuracy score, or reproduced experiment result is claimed.
+
+This supersedes the expanded cross-team emphasis in the preceding Slack-informed revision. The Google abstract draft was read for comparison and was not edited. Local changes containing Slack-derived context remain unpublished pending explicit approval.

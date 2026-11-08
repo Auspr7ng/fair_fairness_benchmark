@@ -89,9 +89,10 @@
 % 87a5b301c5aca2775e9d210042a21a07fc038493 (2026-11-02).
 % Five-metric demonstration is supplied by the team; no accuracy claim is implied.
 % Authors supplied by the user in the Team 2 membership screenshot.
-% TODO: Confirm title, venue, demonstration PDF and metric names.
+% Title follows the user-confirmed onboarding framing.
+% TODO: Confirm venue, demonstration PDF and metric names.
 % Cross-team roles: user-shared Landseer Agent Tools.xlsx, team 1--4 sheets.
-\title{Toward Agentic Paper Analysis\\for Defense Reproduction}
+\title{Agentic Onboarding Tools for Empirical\\Evaluation of Machine Learning Defenses}
 \author{Aarush Kumar \and Andrew Zeng \and Benjamin Taylor \and Bhanu Adaveni \and Rudra Vaishnav \and Yuchao Shen}
 \institute{Team 2 \enspace | \enspace Purdue University}
 \footercontent{\href{https://github.com/Auspr7ng/fair_fairness_benchmark}{github.com/Auspr7ng/fair\_fairness\_benchmark}\hfill Working draft \enspace | \enspace November 2026}
@@ -106,21 +107,21 @@
 \separatorcolumn
 \begin{column}{\colwidth}
 
-\begin{block}{1 \enspace Motivation}
-Real-world machine learning systems may need to satisfy \textbf{privacy, robustness, and fairness} together. Defenses designed for individual guarantees can interact and change their combined effects.
+\begin{block}{1 \enspace Motivation: multiple guarantees}
+Real-world machine learning systems may need to provide \textbf{privacy, robustness, and fairness simultaneously}. Defenses designed for individual guarantees can interact, changing their combined effects.
 
-\textbf{Landseer} is an empirical framework for studying these interactions. Evaluating existing defenses requires onboarding diverse tools and connecting published results to reproducible experiments.
+To study these interactions empirically, existing defenses must be brought into a common evaluation workflow. This \textbf{onboarding} is difficult: research papers and implementations use different metrics, experimental settings, and reporting formats.
 
-Different defenses start with different code, models, and datasets. The project therefore targets a common ResNet-20 backbone, using CIFAR-10 for other tools and CelebA for fairness~[4]. Our role is to turn paper-reported metrics into reference records for this comparison.
+We are developing \textbf{agentic onboarding tools} for this broader effort. Our team's focus is the paper-analysis step: identifying evaluation metrics and organizing reported values into reference records for later validation.
 \end{block}
 \vspace{0.7cm}
 
 \begin{alertblock}{Research question}
-How can an agentic workflow turn research papers into structured reference records that support defense reproduction and validation?
+How can agentic onboarding connect published evaluation results to structured records for empirical ML defense evaluation?
 \end{alertblock}
 \vspace{0.7cm}
 
-\begin{block}{2 \enspace Team 2: paper-analysis tools}
+\begin{block}{2 \enspace Our contribution: three tools}
 \begin{itemize}
 \item \textbf{Metric extractor:} identify evaluation metric names from research papers.
 \item \textbf{Record initializer:} structure paper-reported numerical values into metric records.
@@ -131,21 +132,24 @@ We use the \textbf{Fair Fairness Benchmark (FFB)} repository as a local developm
 \end{block}
 \vspace{0.7cm}
 
-\begin{block}{Where Team 2 fits in Landseer}
-The shared tool inventory~[3] describes complementary workstreams:
-\begin{itemize}
-\item \textbf{Team 1 (IPMix):} environment preparation, repository inspection, Dockerfiles, images, and containers.
-\item \textbf{Team 2 (FFB):} paper reference records: extract metrics, initialize values, and validate updates.
-\item \textbf{Team 3 (EP/BNP):} repository adaptation, dataset discovery, and model support.
-\item \textbf{Team 4 (UAP):} reproduction and validation: run containers, extract metrics, and compare against records.
-\end{itemize}
-These paper assignments~[4] and tool roles~[3] define complementary workstreams. Dockerfiles were shared on Nov. 2; successful integrated builds and runs still need verification.
+\begin{block}{Role in the broader onboarding effort}
+The broader project includes environment preparation, repository and model adaptation, experiment execution, and validation~[3].
+
+\textbf{Team 2 provides paper reference records.} These records are intended to supply reported values for comparison with reproduced experimental results.
+
+The tools are planned for integration into \textbf{Landseer}, an empirical framework under development to study ML defense interactions. Complete integration and evaluation remain future work.
+\end{block}
+\vspace{0.7cm}
+\begin{block}{What a reference record represents}
+Each metric name maps to a reported numerical value, or \texttt{null} when unresolved. A selected table row can narrow the intended experiment.
+
+\textbf{Context matters:} a paper may report the same metric for several models or datasets. Full dataset, model, and row provenance is not yet captured in the record.
 \end{block}
 \end{column}
 \separatorcolumn
 \begin{column}{\colwidth}
 
-\begin{block}{3 \enspace Team 2 workflow and handoff}
+\begin{block}{3 \enspace Paper-to-record workflow}
 \begin{center}
 \begin{tikzpicture}[x=1cm,y=1cm]
 \tikzset{stage/.style={draw=PurdueBlack,fill=PurdueLight,line width=1.4pt,text width=27cm,align=center,inner sep=0.45cm,font=\large},flow/.style={->,line width=2pt}}
@@ -153,7 +157,7 @@ These paper assignments~[4] and tool roles~[3] define complementary workstreams.
 \node[stage] (extract) at (0,-3.7) {\textbf{Extractor}\\Identify and rank evaluation metric names};
 \node[stage] (init) at (0,-7.4) {\textbf{Initializer}\\Find reported values; optionally select a table row};
 \node[stage] (record) at (0,-11.1) {\textbf{Insertion tool + JSON record}\\Validate and persist reviewed metric updates};
-\node[stage,fill=PurdueGold] (future) at (0,-14.8) {\textbf{Planned handoff to Team 4}\\Align metric, dataset, model, and scale before comparison};
+\node[stage,fill=PurdueGold] (future) at (0,-14.8) {\textbf{Future: empirical defense validation}\\Compare reference records with reproduced results};
 \draw[flow] (paper)--(extract);
 \draw[flow] (extract)--(init);
 \draw[flow] (init)--(record);
@@ -164,14 +168,16 @@ These paper assignments~[4] and tool roles~[3] define complementary workstreams.
 \vspace{0.5cm}
 
 \begin{block}{4 \enspace Tool design}
-\heading{Identify metrics}
-PDF text and table extraction feed an LLM-assisted selector, with a dictionary-based fallback when the model is unavailable or fails. The output reports which path supplied the names.
+\heading{Extractor: paper $\rightarrow$ metric names}
+\textbf{Input:} research paper PDF. \textbf{Output:} a list of evaluation metric names. Extracted text and tables feed an LLM-assisted selector, with a dictionary fallback when the model is unavailable or fails.
 
-\heading{Initialize reference values}
-The initializer ranks candidate values using text proximity, table alignment, and other heuristic evidence. A selected table row can restrict the search when a metric has several reported values. Unresolved values remain \texttt{null}.
+\heading{Initializer: names + paper $\rightarrow$ record}
+\textbf{Input:} paper, optional metric names, and optional table-row label. \textbf{Output:} a metric-to-value record. Heuristics rank candidate values; unresolved entries remain \texttt{null} for review.
 
-\heading{Review and update}
-The insertion tool updates an existing metric, checks its name and finite numerical value, and supports JSON loading and saving. It manages records rather than calculating evaluation metrics. The agent's record tools are bound to a selected file; an offline command also connects extraction to JSON initialization~[2].
+\heading{Insertion: reviewed value $\rightarrow$ saved record}
+\textbf{Input:} existing record, metric name, and numerical value. \textbf{Output:} the updated record, with JSON loading and saving. Unknown metrics and invalid numerical values are rejected.
+
+Local agent interfaces expose these operations, and an offline entry point connects metric selection to record initialization~[2].
 \end{block}
 \end{column}
 \separatorcolumn
@@ -186,7 +192,7 @@ in a local FFB demonstration
 
 This team-reported demonstration establishes preliminary \textbf{metric-extraction functionality}. It does not yet measure extraction accuracy, value correctness, or end-to-end reproduction success.
 
-\textbf{Additional team-reported milestone:} a local Qwen/Ollama agent called the reproduction-script listing tool successfully (Sept. 21). This verifies a basic tool call, not the full paper-to-experiment workflow.
+The structured records are intended to provide reference values for comparison with reproduced results. This comparison has not yet been evaluated end to end.
 \end{block}
 \vspace{0.6cm}
 
@@ -195,7 +201,7 @@ This team-reported demonstration establishes preliminary \textbf{metric-extracti
 \item Three tools and local agent interfaces are implemented in the repository.
 \item Selected-row targeting is supported; complete dataset, model, and row provenance remains future work.
 \item PDF layouts, repeated results, and heuristic value selection still require human review.
-\item Live agent performance and a complete Landseer defense-reproduction workflow remain to be evaluated.
+\item Agent tool-selection quality and the complete onboarding-to-validation workflow remain to be evaluated.
 \end{itemize}
 \end{block}
 \vspace{0.6cm}
@@ -204,15 +210,15 @@ This team-reported demonstration establishes preliminary \textbf{metric-extracti
 \begin{enumerate}
 \item Build a manually annotated set of metrics, values, and source locations across papers.
 \item Evaluate metric precision/recall, value correctness, and experimental-context matching.
-\item Connect Team 2 records with the other teams' environment, adaptation, and validation tools; evaluate the integrated Landseer workflow.
+\item Integrate the three tools into the broader empirical framework and evaluate end-to-end defense reproduction and validation.
 \end{enumerate}
 \end{alertblock}
 \vspace{0.6cm}
 
-\begin{block}{FFB case study: comparison plan}
-The repository contains ERM and DiffDP runners for ResNet-18/20 on CelebA. For the common ResNet-20 target, compare predictive performance and group fairness under matched data splits, training budgets, and initialization.
+\begin{block}{Takeaway}
+Agentic onboarding can help connect published ML defense evaluations to structured, reviewable reference records.
 
-\textbf{A changed model or dataset changes the experiment.} Paper reference values guide validation; they are not automatically expected scores for the adapted setting. Completed CelebA comparison results are not yet committed.
+Our prototype implements metric extraction, record initialization, and validated value insertion. The next milestone is to evaluate these tools within an integrated reproduction and validation workflow.
 \end{block}
 \vspace{0.3cm}
 
@@ -221,7 +227,6 @@ The repository contains ERM and DiffDP runners for ResNet-18/20 on CelebA. For t
 [1] Han et al. \emph{FFB: A Fair Fairness Benchmark for In-Processing Group Fairness Methods}. ICLR 2024. \href{https://arxiv.org/abs/2306.09468}{arXiv:2306.09468}.\par
 [2] Team repository, code snapshot \texttt{87a5b30}, Nov. 2, 2026. \href{https://github.com/Auspr7ng/fair_fairness_benchmark}{Auspr7ng/fair\_fairness\_benchmark}.\par
 [3] \emph{Landseer Agent Tools}, shared project workbook, team worksheets.\par
-[4] Project Slack: \#fall26 assignments and model/data guidance (Aug.--Sept. 2026); Team 2 progress discussion (Sept. 2026).\par
 }
 \end{block}
 \end{column}
