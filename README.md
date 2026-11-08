@@ -65,6 +65,8 @@ The code in `ffb/src/`, `ffb/benchmark/`, `ffb/datasets/`, `ffb/tutorial/`, and 
 
 | Nov 8, 2026 | [Poster](poster/main.tex) and [alignment notes](poster/README.md) | Aligned the poster with the abstract: agentic onboarding motivation, explicit inputs/outputs for three tools, preliminary five-name demonstration, and future integration. |
 
+| Nov 8, 2026 | [Poster workflow diagram](poster/main.tex) | Added a four-team context diagram highlighting Team 2 and marking cross-team handoffs as proposed integration. |
+
 ## Try the current work
 
 Run the following commands from the repository root. Each component has its own requirements; the data and Ollama model are not included in the repository.
