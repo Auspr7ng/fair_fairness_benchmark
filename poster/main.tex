@@ -132,18 +132,22 @@ We use the \textbf{Fair Fairness Benchmark (FFB)} repository as a local developm
 \end{block}
 \vspace{0.7cm}
 
-\begin{block}{Role in the broader onboarding effort}
-The broader project includes environment preparation, repository and model adaptation, experiment execution, and validation~[3].
-
-\textbf{Team 2 provides paper reference records.} These records are intended to supply reported values for comparison with reproduced experimental results.
-
-The tools are planned for integration into \textbf{Landseer}, an empirical framework under development to study ML defense interactions. Complete integration and evaluation remain future work.
-\end{block}
-\vspace{0.7cm}
-\begin{block}{What a reference record represents}
-Each metric name maps to a reported numerical value, or \texttt{null} when unresolved. A selected table row can narrow the intended experiment.
-
-\textbf{Context matters:} a paper may report the same metric for several models or datasets. Full dataset, model, and row provenance is not yet captured in the record.
+\begin{block}{Team 2: paper-to-record workflow}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+\tikzset{paperstage/.style={draw=PurdueBlack,fill=PurdueLight,line width=1.4pt,text width=29cm,align=center,inner sep=0.45cm,font=\fontsize{26}{32}\selectfont},paperflow/.style={->,line width=1.8pt}}
+\node[paperstage] (pdf) at (0,0) {\textbf{Research paper PDF}};
+\node[paperstage] (names) at (0,-3.1) {\textbf{Extractor}\\Identify evaluation metric names};
+\node[paperstage] (values) at (0,-6.7) {\textbf{Initializer}\\Find reported values; optionally select a table row};
+\node[paperstage,fill=PurdueGold] (json) at (0,-10.3) {\textbf{Insertion tool + JSON record}\\Validate and persist reviewed metric updates};
+\node[paperstage] (compare) at (0,-13.9) {\textbf{Future: empirical validation}\\Compare with reproduced experimental results};
+\draw[paperflow] (pdf)--(names);
+\draw[paperflow] (names)--(values);
+\draw[paperflow] (values)--(json);
+\draw[paperflow,dashed] (json)--(compare);
+\end{tikzpicture}
+\end{center}
+{\fontsize{22}{28}\selectfont Unresolved entries remain \texttt{null}; full dataset, model, and row provenance remains future work. The dashed final step denotes planned integration into the broader empirical framework.}
 \end{block}
 \end{column}
 \separatorcolumn

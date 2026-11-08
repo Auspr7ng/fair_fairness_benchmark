@@ -60,3 +60,7 @@ This supersedes the expanded cross-team emphasis in the preceding Slack-informed
 ### Four-team workflow diagram (November 8, 2026)
 
 Replaced the central paper-only flow with a four-team context diagram based on the previously reviewed shared tool workbook. Team 2's gold-highlighted paper-reference branch converges with the repository-adaptation/environment-preparation branch at Team 4's reproduction and validation step. Dashed arrows explicitly denote proposed handoffs; adaptation and environment preparation may iterate. This is a conceptual integration diagram, not a claim that the pipeline has run end to end. Tool input/output descriptions remain below the figure.
+
+### Restore Team 2 detail diagram (November 8, 2026)
+
+Retained both diagrams: the left column shows Team 2's paper-to-record operations and the middle column shows four-team context. The detailed flow restores PDF → extractor → initializer → validated JSON record → future empirical validation. Replaced repetitive context prose to make room; dashed final handoff remains explicitly future work.

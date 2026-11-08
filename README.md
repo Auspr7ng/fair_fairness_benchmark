@@ -67,6 +67,8 @@ The code in `ffb/src/`, `ffb/benchmark/`, `ffb/datasets/`, `ffb/tutorial/`, and 
 
 | Nov 8, 2026 | [Poster workflow diagram](poster/main.tex) | Added a four-team context diagram highlighting Team 2 and marking cross-team handoffs as proposed integration. |
 
+| Nov 8, 2026 | [Poster diagrams](poster/main.tex) | Restored the detailed Team 2 paper-to-record figure alongside the four-team overview. |
+
 ## Try the current work
 
 Run the following commands from the repository root. Each component has its own requirements; the data and Ollama model are not included in the repository.
