@@ -46,6 +46,32 @@ class MetricsRecordTests(unittest.TestCase):
         )
         self.assertEqual(initialize_metrics_record(str(self.paper), ["F1"]), {"F1": None})
 
+    def test_bounds_and_ranges_are_not_exact_values(self):
+        for statement in (
+            "F1 > 0.87", "F1 ≥ 0.87", "F1 of at least 0.87",
+            "F1 of 0.87 or higher", "F1 between 0.80 and 0.87",
+            "F1 = 0.80–0.87", "F1 ranges from 0.80 to 0.87",
+        ):
+            with self.subTest(statement=statement):
+                self.paper.write_text(
+                    f"Results\nOur method achieved {statement}. Accuracy = 92%.",
+                    encoding="utf-8",
+                )
+                self.assertEqual(
+                    initialize_metrics_record(str(self.paper), ["F1", "Accuracy"]),
+                    {"F1": None, "Accuracy": 92.0},
+                )
+
+    def test_blank_paper_with_supplied_metrics_fails_before_persisting(self):
+        from team.paper_pipeline import run_pipeline
+
+        self.paper.write_text(" \n", encoding="utf-8")
+        output = self.paper.with_suffix(".json")
+        output.write_text('{"F1": 0.8}', encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "No extractable"):
+            run_pipeline(self.paper, output, metrics=["F1"], overwrite=True)
+        self.assertEqual(output.read_text(encoding="utf-8"), '{"F1": 0.8}')
+
     def test_compatibility_update_fills_missing_value_and_preserves_other_entries(self):
         record = {"F1": None, "Accuracy": 92.0}
         self.assertIs(insert_eval_metric(record, "F1", 0.87), record)
@@ -106,6 +132,23 @@ class MetricsRecordTests(unittest.TestCase):
                 row_label="bank age",
             ),
             {"Accuracy": 91.17, "F1": 54.31, "Demographic Parity": 10.88},
+        )
+
+    def test_unruled_table_preserves_unknown_and_missing_columns(self):
+        self.paper.write_text(
+            "Results\nMethod acc custom f1 auc\n"
+            "Ours 92.0 17.0 N/A 0.95\n",
+            encoding="utf-8",
+        )
+        self.assertEqual(
+            initialize_metrics_record(
+                str(self.paper), ["Accuracy", "F1", "AUC", "BLEU"], row_label="Ours",
+            ),
+            {"Accuracy": 92.0, "F1": None, "AUC": 0.95, "BLEU": None},
+        )
+        self.assertEqual(
+            initialize_metrics_record(str(self.paper), ["BLEU"], row_label="Ours"),
+            {"BLEU": None},
         )
 
 
