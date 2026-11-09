@@ -71,6 +71,10 @@ def create_eval_metrics_record(
     # finer spacing exposes figure numbers that the text crawl mistakes for results.
     paper = (PaperContent(split_sections(path.read_text(encoding='utf-8')))
              if path.suffix.lower() == '.txt' else extract_paper(str(path), x_tolerance_ratio=None))
+    if not any(section.text.strip() for section in paper.sections) and not any(
+        cell.strip() for table in paper.tables for row in table.rows for cell in row
+    ):
+        raise ValueError('No extractable paper text or table cells')
     names = ([score.name for score in rank_metrics(paper)[:top_k]]
              if metrics is None else [normalize_metric(name) or name for name in metrics])
     record = dict.fromkeys(names, None)
@@ -78,8 +82,8 @@ def create_eval_metrics_record(
     if row_label is None:
         evidence.extend(_crawl_text(paper, record, scoring, window))
     elif not evidence:
-        evidence.extend(_crawl_unruled_table_row(paper, record, scoring, row_label))
-        if not found_row and not evidence:
+        evidence, found_unruled_row = _crawl_unruled_table_row(paper, record, scoring, row_label)
+        if not found_row and not found_unruled_row:
             raise ValueError(f'No table row labeled {row_label!r} was found')
     ranked = _rank_values(evidence, scoring)
     for metric in record:

@@ -64,13 +64,17 @@ score. The weights are in `records.py` and can be overridden with `weights`.
 
 A value is assigned only if it reaches `min_score` and leads the next candidate
 by `min_margin`. Percentages keep their printed scale (`92%` becomes `92.0`);
-for `87.0 ± 1.2`, the central value is stored. These scores are heuristics,
+for `87.0 ± 1.2`, the central value is stored. Bounds such as `F1 > 0.87`
+and ranges such as `F1 between 0.80 and 0.87` do not provide an exact value.
+For selected plain-text rows, unknown headers and missing cells such as
+`N/A` keep their column positions. Rows with mismatched cell and header
+counts are skipped. These scores are heuristics,
 not probabilities. The function returns one scalar per metric, so papers with
 many datasets, models, or metric variants can remain ambiguous. The FFB paper
 reports many values per metric across datasets and sensitive attributes; an
 unqualified call may therefore return `None` rather than choose an arbitrary
-one. Scanned PDFs have no OCR, and complex or scrambled PDF tables may need
-manual review.
+one. Empty papers and scanned PDFs with no extractable text or table cells
+raise an error. Complex or scrambled PDF tables may need manual review.
 
 ## Component responsibilities
 
