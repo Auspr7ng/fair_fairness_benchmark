@@ -1,7 +1,6 @@
 """Choose paper sections for model input without calling a model."""
 
-from .extraction import PaperContent
-from .sections import REFERENCES, RESULTS
+from team.eval_metrics_tool.section_splitter import REFERENCES, RESULTS, PaperContent
 
 
 def experiments_section(content: PaperContent) -> str:

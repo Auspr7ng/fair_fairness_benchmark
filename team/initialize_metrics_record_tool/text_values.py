@@ -3,7 +3,7 @@
 import math
 import re
 
-from team.eval_metrics_tool.eval_metrics.matcher import find_requested_metrics
+from team.eval_metrics_tool.metric_matcher import find_requested_metrics
 from .evidence import _NUMBER, _Evidence, _context_features, _section_features
 
 _NUMBERS = re.compile(rf'(?<![\w.])(?P<value>{_NUMBER})(?!\w|\.\d)\s*(?P<percent>%)?')

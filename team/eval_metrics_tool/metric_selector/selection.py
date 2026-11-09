@@ -2,10 +2,10 @@
 
 from dataclasses import dataclass
 
-from .extraction import PaperContent
-from .llm import LLMError, ask_llm, resolve_model
-from .paper_text import llm_text
-from .scoring import MetricScore, rank_metrics
+from team.eval_metrics_tool.llm_metric_finder import LLMError, ask_llm, resolve_model
+from team.eval_metrics_tool.metric_ranker import MetricScore, rank_metrics
+from team.eval_metrics_tool.section_selector import llm_text
+from team.eval_metrics_tool.section_splitter import PaperContent
 
 
 def llm_metrics(content: PaperContent, top_k: int, model: str | None,

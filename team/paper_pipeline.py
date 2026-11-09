@@ -3,7 +3,9 @@ import argparse
 import json
 from pathlib import Path
 
-from team.eval_metrics_tool.eval_metrics import extract_paper, select_metrics, PDFReadError
+from team.eval_metrics_tool.metric_extractor import extract_paper
+from team.eval_metrics_tool.metric_selector import select_metrics
+from team.eval_metrics_tool.pdf_reader import PDFReadError
 from team.initialize_metrics_record_tool import initialize_metrics_record
 from team.insert_into_record_tool import MetricsRecord
 

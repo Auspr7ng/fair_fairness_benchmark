@@ -5,9 +5,10 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 from reportlab.lib import colors
 from reportlab.pdfgen import canvas
 
-from eval_metrics import (PaperContent, PDFReadError, extract_eval_metrics, extract_paper,
-                          llm_text, rank_pdf)
-from eval_metrics.sections import split_sections
+from team.eval_metrics_tool.metric_extractor import extract_eval_metrics, extract_paper, rank_pdf
+from team.eval_metrics_tool.pdf_reader import PDFReadError, PdfPage, read_pdf
+from team.eval_metrics_tool.section_selector import llm_text
+from team.eval_metrics_tool.section_splitter import PaperContent, build_paper, split_sections
 
 
 def build_pdf(path):
@@ -38,6 +39,23 @@ def pdf(tmp_path):
 @pytest.fixture(autouse=True)
 def no_default_model(monkeypatch):
     monkeypatch.delenv("EVAL_METRICS_MODEL", raising=False)
+
+
+def test_read_pdf_returns_raw_pages(pdf):
+    pages = read_pdf(pdf)
+    assert len(pages) == 1
+    assert "3 Experiments" in pages[0].text
+    assert pages[0].tables == [[["Model", "F1", "BLEU"], ["Baseline", "70.1", "20.3"],
+                                ["Ours", "75.4", "24.8"]]]
+
+
+def test_build_paper_tags_each_table_with_the_section_covering_its_page():
+    rows = [["Model", "F1"], ["Ours", "75.4"]]
+    paper = build_paper([PdfPage("Introduction\nBackground.", [rows]),
+                         PdfPage("Experiments\nWe report F1 on the test set.", [rows])])
+    assert [s.kind for s in paper.sections] == ["introduction", "results"]
+    assert [(t.section, t.page, t.rows) for t in paper.tables] == [
+        ("introduction", 1, rows), ("results", 2, rows)]
 
 
 def test_end_to_end_ranking(pdf):
@@ -76,7 +94,7 @@ def test_not_a_pdf(tmp_path):
 
 
 def test_cli(pdf, capsys):
-    from eval_metrics.__main__ import main
+    from team.eval_metrics_tool.metric_extractor.__main__ import main
     assert main([pdf, "--top-k", "2", "--no-llm"]) == 0
     assert capsys.readouterr().out.split() == ["F1", "BLEU"]
     assert main([pdf, "--verbose", "--top-k", "1", "--no-llm"]) == 0
@@ -151,7 +169,7 @@ def test_tightly_spaced_words_stay_apart(tmp_path):
 
 
 def test_cli_llm_and_show_section(pdf, fake_litellm, capsys):
-    from eval_metrics.__main__ import main
+    from team.eval_metrics_tool.metric_extractor.__main__ import main
     fake_litellm.reply = '["F1", "BLEU"]'
     assert main([pdf, "--model", "ollama/test", "--api-base", "http://host:11434"]) == 0
     assert capsys.readouterr().out.split() == ["F1", "BLEU"]

@@ -1,7 +1,6 @@
 import pytest
 
-from eval_metrics.matcher import find_metrics, normalize_metric
-from eval_metrics.metrics_dictionary import METRICS
+from team.eval_metrics_tool.metric_matcher import METRICS, find_metrics, normalize_metric
 
 
 @pytest.mark.parametrize("alias", ["F-measure", "F1-score", "F1 score", "macro-F1",

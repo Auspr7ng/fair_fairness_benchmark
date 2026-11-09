@@ -1,6 +1,7 @@
 import pytest
 
-from eval_metrics.llm import LLMError, _parse, ask_llm, find_env_file  # real one, before stubbing
+from team.eval_metrics_tool.llm_metric_finder.llm import (LLMError, _parse, ask_llm,  # real one, before stubbing
+                                                          find_env_file)
 
 
 def test_parse_plain_array():
@@ -39,7 +40,7 @@ def test_ask_llm_wraps_provider_errors(fake_litellm):
 
 
 def test_env_file_supplies_model_and_api_base(tmp_path, monkeypatch, fake_litellm):
-    from eval_metrics import llm
+    from team.eval_metrics_tool.llm_metric_finder import llm
     env = tmp_path / ".env"
     env.write_text("EVAL_METRICS_MODEL=ollama/from-env\nEVAL_METRICS_API_BASE=http://box:11434\n")
     monkeypatch.setattr(llm, "find_env_file", lambda: env)
@@ -51,7 +52,7 @@ def test_env_file_supplies_model_and_api_base(tmp_path, monkeypatch, fake_litell
 
 
 def test_shell_env_beats_env_file(tmp_path, monkeypatch):
-    from eval_metrics import llm
+    from team.eval_metrics_tool.llm_metric_finder import llm
     env = tmp_path / ".env"
     env.write_text("EVAL_METRICS_MODEL=from-file\n")
     monkeypatch.setattr(llm, "find_env_file", lambda: env)

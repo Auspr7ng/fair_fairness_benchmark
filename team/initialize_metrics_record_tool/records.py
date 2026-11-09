@@ -11,10 +11,10 @@ from typing import Optional, Union
 
 from team.insert_into_record_tool import MetricsRecord
 
-from team.eval_metrics_tool.eval_metrics.extraction import PaperContent, extract_paper
-from team.eval_metrics_tool.eval_metrics.matcher import find_metrics, normalize_metric
-from team.eval_metrics_tool.eval_metrics.scoring import rank_metrics
-from team.eval_metrics_tool.eval_metrics.sections import split_sections
+from team.eval_metrics_tool.metric_extractor import extract_paper
+from team.eval_metrics_tool.metric_matcher import find_metrics, normalize_metric
+from team.eval_metrics_tool.metric_ranker import rank_metrics
+from team.eval_metrics_tool.section_splitter import PaperContent, split_sections
 
 from .evidence import VALUE_WEIGHTS
 from .text_values import _crawl_text

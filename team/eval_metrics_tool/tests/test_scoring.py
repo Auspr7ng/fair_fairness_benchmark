@@ -1,6 +1,5 @@
-from eval_metrics.extraction import PaperContent, Table
-from eval_metrics.scoring import WEIGHTS, rank_metrics
-from eval_metrics.sections import classify_heading, split_sections
+from team.eval_metrics_tool.metric_ranker import WEIGHTS, rank_metrics
+from team.eval_metrics_tool.section_splitter import PaperContent, Table, classify_heading, split_sections
 
 
 def paper(text, tables=()):

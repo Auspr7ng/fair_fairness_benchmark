@@ -2,7 +2,7 @@
 import json
 from langchain_core.tools import tool
 from team.paper_pipeline import run_pipeline
-from team.eval_metrics_tool.eval_metrics import PDFReadError
+from team.eval_metrics_tool.pdf_reader import PDFReadError
 
 
 def create_initialization_tool(record_path):

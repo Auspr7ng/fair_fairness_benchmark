@@ -4,9 +4,9 @@ import re
 from collections import Counter
 from dataclasses import dataclass, field
 
-from .extraction import PaperContent, Table
-from .matcher import find_metrics
-from .sections import ABSTRACT, RELATED, REFERENCES, RESULTS, Section
+from team.eval_metrics_tool.metric_matcher import find_metrics
+from team.eval_metrics_tool.section_splitter import (ABSTRACT, RELATED, REFERENCES, RESULTS,
+                                                     PaperContent, Section, Table)
 
 # Heuristic weights, meant to be tuned. Higher = stronger evidence that a metric
 # is one the paper actually reports. A weight of 0 ignores that location.

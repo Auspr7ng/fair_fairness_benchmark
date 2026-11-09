@@ -25,8 +25,7 @@ def test_custom_metric_handoff_and_readback(tmp_path):
 
 
 def test_blank_input_does_not_create_record(tmp_path):
-    from team.eval_metrics_tool.eval_metrics.extraction import PaperContent
-    from team.eval_metrics_tool.eval_metrics.sections import split_sections
+    from team.eval_metrics_tool.section_splitter import PaperContent, split_sections
     dest=tmp_path/'record.json'
     with patch('team.paper_pipeline.extract_paper',return_value=PaperContent(split_sections(''))):
         with pytest.raises(ValueError, match='No extractable'):

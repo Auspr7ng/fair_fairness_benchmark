@@ -1,11 +1,15 @@
 import argparse
 import sys
 
-from . import PDFReadError, extract_paper, llm_text, select_metrics
+from team.eval_metrics_tool.metric_selector import select_metrics
+from team.eval_metrics_tool.pdf_reader import PDFReadError
+from team.eval_metrics_tool.section_selector import llm_text
+
+from . import extract_paper
 
 
 def main(argv=None) -> int:
-    p = argparse.ArgumentParser(prog="eval_metrics",
+    p = argparse.ArgumentParser(prog="python -m team.eval_metrics_tool.metric_extractor",
                                 description="List the main evaluation metrics a paper reports.")
     p.add_argument("pdf")
     p.add_argument("--top-k", type=int, default=5)
