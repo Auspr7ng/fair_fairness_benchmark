@@ -11,7 +11,7 @@ Last updated: November 8, 2026. Team 2 focuses on paper-analysis tools for a pla
 | FFB reference code | Original training scripts, models, metrics, dataset instructions, tutorial, and figures under [`ffb/`](ffb/) | Available as the baseline; the original paper's figures and running logs are upstream results, not new group results. |
 | CelebA reproduction | Four ResNet-18/ResNet-20 runners for ERM and DiffDP under [`ffb/reproduce/`](ffb/reproduce/) | Scripts and a dependency/data preflight are implemented. No completed run output is committed; training still needs the CelebA data and dependencies. |
 | PDF evaluation-metric extractor | [`team/eval_metrics_tool/`](team/eval_metrics_tool/) | Lists a paper's metrics with a user-configured LLM (any LiteLLM provider), falling back to rule-based PDF text/table extraction, metric matching, and ranking. Scanned PDFs and some table layouts remain unsupported. |
-| Metric record initializer | [`team/initialize_metrics_record_tool/`](team/initialize_metrics_record_tool/) | Extracts reported values into a metric-to-value record. Ambiguous or missing values remain empty for review. |
+| Metric record initializer | [`team/initialize_metrics_record_tool/`](team/initialize_metrics_record_tool/) | Extracts reported values into a metric-to-value record. Ambiguous or missing values remain empty for review. Bounds and ranges in prose are excluded from exact values. |
 | Metric record updater | [`team/insert_into_record_tool/`](team/insert_into_record_tool/) | Validates updates to an initialized record and saves the selected record as JSON. |
 | Local repository agent | [`team/agent/`](team/agent/) | A basic Ollama/LangChain agent can list the available reproduction scripts, list a paper's evaluation metrics, and read or update a selected metric record. It can also initialize the selected record when explicitly requested. It is not yet an automated experiment runner. |
 
@@ -72,6 +72,7 @@ The code in `ffb/src/`, `ffb/benchmark/`, `ffb/datasets/`, `ffb/tutorial/`, and 
 | Nov 8, 2026 | [Poster layout](poster/main.tex) | Fixed overlapping team boxes and the execution-environment label using edge-based spacing. |
 
 | Nov 8, 2026 | [Poster validation section](poster/main.tex) | Simplified the result panel to user-reported basic validation against four instructor-provided PDFs; this editing pass did not rerun validation. |
+| Nov 9, 2026 | [Metric initializer](team/initialize_metrics_record_tool/) | Preserved column positions in selected plain-text tables, excluded prose bounds and ranges from exact values, and protected saved records from blank paper inputs. Added regression coverage. |
 
 ## Try the current work
 
