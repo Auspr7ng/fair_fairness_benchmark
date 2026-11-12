@@ -2,7 +2,7 @@
 
 This repository organizes the published [Fair Fairness Benchmark (FFB)](https://github.com/ahxt/fair_fairness_benchmark) code alongside our group's reproduction work and supporting tools. The original benchmark is a framework for evaluating in-processing group fairness methods. Our work here is an extension and organization of that code, not a claim that we reproduced every result in the paper.
 
-Last updated: November 8, 2026. Team 2 focuses on paper-analysis tools for a planned Landseer integration; FFB is the local development and demonstration setting.
+Last updated: November 11, 2026. Team 2 focuses on paper-analysis tools for a planned Landseer integration; FFB is the local development and demonstration setting.
 
 ## Progress at a glance
 
@@ -72,6 +72,8 @@ The code in `ffb/src/`, `ffb/benchmark/`, `ffb/datasets/`, `ffb/tutorial/`, and 
 | Nov 8, 2026 | [Poster layout](poster/main.tex) | Fixed overlapping team boxes and the execution-environment label using edge-based spacing. |
 
 | Nov 8, 2026 | [Poster validation section](poster/main.tex) | Simplified the result panel to user-reported basic validation against four instructor-provided PDFs; this editing pass did not rerun validation. |
+
+| Nov 11, 2026 | [Poster](poster/main.tex) | Reduced prose and added vector guarantee / PDF illustrations and tool cards, retaining both workflow diagrams. |
 
 ## Try the current work
 

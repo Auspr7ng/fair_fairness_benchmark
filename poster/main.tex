@@ -106,62 +106,55 @@
 \begin{columns}[t]
 \separatorcolumn
 \begin{column}{\colwidth}
-
-\begin{block}{1 \enspace Motivation: multiple guarantees}
-Real-world machine learning systems may need to provide \textbf{privacy, robustness, and fairness simultaneously}. Defenses designed for individual guarantees can interact, changing their combined effects.
-
-To study these interactions empirically, existing defenses must be brought into a common evaluation workflow. This \textbf{onboarding} is difficult: research papers and implementations use different metrics, experimental settings, and reporting formats.
-
-We are developing \textbf{agentic onboarding tools} for this broader effort. Our team's focus is the paper-analysis step: identifying evaluation metrics and organizing reported values into reference records for later validation.
-\end{block}
-\vspace{0.7cm}
-
-\begin{alertblock}{Research question}
-How can agentic onboarding connect published evaluation results to structured records for empirical ML defense evaluation?
-\end{alertblock}
-\vspace{0.7cm}
-
-\begin{block}{2 \enspace Our contribution: three tools}
-\begin{itemize}
-\item \textbf{Metric extractor:} identify evaluation metric names from research papers.
-\item \textbf{Record initializer:} structure paper-reported numerical values into metric records.
-\item \textbf{Insertion tool:} validate metric names and numerical updates, with JSON storage.
-\end{itemize}
-
-We use the \textbf{Fair Fairness Benchmark (FFB)} repository as a local development and demonstration setting. The original FFB benchmark and published results are prior work~[1]; our contribution is the supporting paper-analysis workflow~[2].
-\end{block}
-\vspace{0.7cm}
-
-\begin{block}{Team 2: paper-to-record workflow}
+\begin{block}{1 \enspace Why onboarding matters}
 \begin{center}
 \begin{tikzpicture}[x=1cm,y=1cm]
-\tikzset{paperstage/.style={draw=PurdueBlack,fill=PurdueLight,line width=1.4pt,text width=29cm,align=center,inner sep=0.45cm,font=\fontsize{26}{32}\selectfont},paperflow/.style={->,line width=1.8pt}}
-\node[paperstage] (pdf) at (0,0) {\textbf{Research paper PDF}};
-\node[paperstage] (names) at (0,-3.1) {\textbf{Extractor}\\Identify evaluation metric names};
-\node[paperstage] (values) at (0,-6.7) {\textbf{Initializer}\\Find reported values; optionally select a table row};
-\node[paperstage,fill=PurdueGold] (json) at (0,-10.3) {\textbf{Insertion tool + JSON record}\\Validate and persist reviewed metric updates};
-\node[paperstage] (compare) at (0,-13.9) {\textbf{Future: empirical validation}\\Compare with reproduced experimental results};
+\tikzset{guarantee/.style={draw=PurdueBlack,fill=PurdueLight,line width=1.5pt,circle,minimum size=7.6cm,align=center,font=\fontsize{28}{34}\selectfont\bfseries}}
+\node[guarantee] (privacy) at (-10,0) {Privacy};
+\node[guarantee,fill=PurdueGold] (robust) at (0,0) {Robustness};
+\node[guarantee] (fair) at (10,0) {Fairness};
+\node[draw,fill=PurdueBlack,text=white,text width=26cm,align=center,inner sep=0.6cm,font=\fontsize{30}{36}\selectfont] (ml) at (0,-8) {\textbf{One ML system. Multiple guarantees.}};
+\draw[->,line width=2pt] (privacy.south)--(ml.north -| privacy.south);
+\draw[->,line width=2pt] (robust.south)--(ml.north);
+\draw[->,line width=2pt] (fair.south)--(ml.north -| fair.south);
+\end{tikzpicture}
+\end{center}
+Defenses can interact. Studying their combined effects requires bringing diverse tools into a common evaluation workflow.
+\end{block}
+\vspace{0.8cm}
+\begin{alertblock}{Our goal}
+Turn paper-reported metrics into \textbf{reviewable reference records} for empirical ML defense evaluation.
+\end{alertblock}
+\vspace{0.8cm}
+\begin{block}{2 \enspace Team 2: paper $\rightarrow$ reference record}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+\tikzset{paperstage/.style={draw=PurdueBlack,fill=PurdueLight,line width=1.4pt,text width=28cm,align=center,inner sep=0.55cm,font=\fontsize{28}{34}\selectfont},paperflow/.style={->,line width=2pt}}
+\node[paperstage] (pdf) at (0,0) {\textbf{Paper PDF}};
+\node[paperstage] (names) at (0,-3.7) {\textbf{1. Extract}\\Which metrics are reported?};
+\node[paperstage] (values) at (0,-7.4) {\textbf{2. Initialize}\\Which values belong in the record?};
+\node[paperstage,fill=PurdueGold] (json) at (0,-11.1) {\textbf{3. Validate + save}\\Reviewed updates $\rightarrow$ JSON};
+\node[paperstage] (compare) at (0,-14.8) {\textbf{Future: compare reproduced results}};
 \draw[paperflow] (pdf)--(names);
 \draw[paperflow] (names)--(values);
 \draw[paperflow] (values)--(json);
 \draw[paperflow,dashed] (json)--(compare);
 \end{tikzpicture}
 \end{center}
-{\fontsize{22}{28}\selectfont Unresolved entries remain \texttt{null}; full dataset, model, and row provenance remains future work. The dashed final step denotes planned integration into the broader empirical framework.}
+{\fontsize{23}{29}\selectfont Dashed arrow: future integration. FFB is our development case study~[1,2].}
 \end{block}
 \end{column}
 \separatorcolumn
 \begin{column}{\colwidth}
-
-\begin{block}{3 \enspace How the four teams connect}
+\begin{block}{3 \enspace The bigger picture}
 \begin{center}
 \begin{tikzpicture}[x=1cm,y=1cm]
 \tikzset{team/.style={draw=PurdueBlack,fill=PurdueLight,line width=1.5pt,text width=13cm,align=center,inner sep=0.55cm,font=\fontsize{25}{31}\selectfont},handoff/.style={->,dashed,line width=1.8pt},labeltext/.style={font=\fontsize{21}{26}\selectfont,align=center,fill=white,inner sep=0.2cm}}
 \node[team,text width=29cm] (input) at (0,0) {\textbf{Research paper + source repository}};
-\node[team,fill=PurdueGold,line width=2.5pt,anchor=north] (two) at (-8,-3) {\textbf{TEAM 2 --- OUR FOCUS}\\Paper reference records\\[0.25cm]Extract metric names\\Initialize reported values\\Validate updates; save JSON};
-\node[team,anchor=north] (three) at (8,-3) {\textbf{TEAM 3}\\Repository / model adaptation\\[0.2cm]Clone repositories\\Identify datasets; add models};
-\node[team,anchor=north] (one) at ([yshift=-1.2cm]three.south) {\textbf{TEAM 1}\\Environment preparation\\[0.2cm]Inspect dependencies\\Generate Dockerfiles\\Build / provision containers};
-\node[team,text width=29cm,anchor=north] (four) at ([xshift=-8cm,yshift=-3.6cm]one.south) {\textbf{TEAM 4 --- REPRODUCE + VALIDATE}\\Run experiments; extract reproduced metrics\\Compare with paper reference values};
+\node[team,fill=PurdueGold,line width=2.5pt,anchor=north] (two) at (-8,-3) {\textbf{TEAM 2 --- OUR FOCUS}\\Paper reference records\\[0.25cm]Extract $\rightarrow$ initialize\\Validate $\rightarrow$ save JSON};
+\node[team,anchor=north] (three) at (8,-3) {\textbf{TEAM 3}\\Repository adaptation\\[0.2cm]Datasets + model support};
+\node[team,anchor=north] (one) at ([yshift=-1.2cm]three.south) {\textbf{TEAM 1}\\Environment preparation\\[0.2cm]Dependencies + Docker\\Build / provision containers};
+\node[team,text width=29cm,anchor=north] (four) at ([xshift=-8cm,yshift=-3.6cm]one.south) {\textbf{TEAM 4 --- REPRODUCE + VALIDATE}\\Run experiments $\rightarrow$ compare metrics};
 \draw[handoff] (input.south) -- ++(0,-0.8) -| (two.north);
 \draw[handoff] (input.south) -- ++(0,-0.8) -| (three.north);
 \draw[handoff] (three.south)--(one.north);
@@ -169,63 +162,70 @@ We use the \textbf{Fair Fairness Benchmark (FFB)} repository as a local developm
 \draw[handoff] (one.south)--(four.north -| one.south) node[labeltext,midway] {Execution\\environment};
 \end{tikzpicture}
 \end{center}
-{\fontsize{22}{28}\selectfont\textbf{Dashed arrows: proposed handoffs.} Roles follow the shared tool inventory~[3]. Adaptation and environment preparation may iterate; this diagram does not claim a completed integration.}
+{\fontsize{22}{28}\selectfont\textbf{Dashed arrows: proposed handoffs.} Planned integration; roles from the shared tool inventory~[3].}
 \end{block}
 \vspace{0.5cm}
 
-\begin{block}{4 \enspace Tool design}
-\heading{Extractor: paper $\rightarrow$ metric names}
-\textbf{Input:} research paper PDF. \textbf{Output:} a list of evaluation metric names. Extracted text and tables feed an LLM-assisted selector, with a dictionary fallback when the model is unavailable or fails.
 
-\heading{Initializer: names + paper $\rightarrow$ record}
-\textbf{Input:} paper, optional metric names, and optional table-row label. \textbf{Output:} a metric-to-value record. Heuristics rank candidate values; unresolved entries remain \texttt{null} for review.
-
-\heading{Insertion: reviewed value $\rightarrow$ saved record}
-\textbf{Input:} existing record, metric name, and numerical value. \textbf{Output:} the updated record, with JSON loading and saving. Unknown metrics and invalid numerical values are rejected.
-
-Local agent interfaces expose these operations, and an offline entry point connects metric selection to record initialization~[2].
+\begin{block}{4 \enspace Three tools, clear outputs}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+\tikzset{toolcard/.style={draw=PurdueBlack,fill=PurdueLight,line width=1.5pt,text width=29cm,align=left,inner sep=0.7cm,font=\fontsize{27}{34}\selectfont}}
+\node[toolcard,anchor=north] (extractcard) at (0,0) {\textbf{EXTRACTOR}\\Paper PDF $\longrightarrow$ metric names\\[0.3cm]LLM selection + dictionary fallback};
+\node[toolcard,anchor=north] (initcard) at ([yshift=-0.7cm]extractcard.south) {\textbf{INITIALIZER}\\Paper + names $\longrightarrow$ values or \texttt{null}\\[0.3cm]Optional table-row selection};
+\node[toolcard,fill=PurdueGold,anchor=north] (savecard) at ([yshift=-0.7cm]initcard.south) {\textbf{INSERTION TOOL}\\Record + reviewed update $\longrightarrow$ saved JSON\\[0.3cm]Reject unknown names / invalid numbers};
+\end{tikzpicture}
+\end{center}
+{\fontsize{23}{29}\selectfont Available through local agent interfaces and an offline pipeline~[2].}
 \end{block}
 \end{column}
 \separatorcolumn
 \begin{column}{\colwidth}
-
 \begin{block}{5 \enspace Basic validation}
-Basic validation is complete. The extracted evaluation-metric information matches the corresponding content in all four instructor-provided research PDFs.
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+\foreach \x/\lab in {-12/IPMix,-4/FFB,4/EP--BNP,12/UAP} {
+  \begin{scope}[shift={(\x,0)}]
+  \draw[fill=PurdueLight,line width=1.5pt] (-3,-3.8) rectangle (3,3.4);
+  \draw[line width=1pt] (-2,1.6)--(2,1.6);
+  \draw[line width=1pt] (-2,0.8)--(2,0.8);
+  \draw[line width=1pt] (-2,0)--(1,0);
+  \node[font=\fontsize{23}{29}\selectfont\bfseries] at (0,2.5) {PDF};
+  \draw[draw=PurdueBlack,fill=PurdueGold,line width=1.5pt] (0,-2.1) circle (1);
+  \draw[line width=2pt] (-0.5,-2.1)--(-0.1,-2.5)--(0.6,-1.7);
+  \node[font=\fontsize{23}{29}\selectfont\bfseries] at (0,-4.8) {\lab};
+  \end{scope}
+}
+\end{tikzpicture}
+\end{center}
+\begin{beamercolorbox}[sep=0.65cm,center]{block body alerted}
+\textbf{Basic validation complete}\\
+Extracted metric information matches the corresponding content in all four instructor-provided PDFs.
+\end{beamercolorbox}
 \end{block}
-\vspace{0.6cm}
-
-\begin{block}{6 \enspace Current status and limitations}
+\vspace{0.9cm}
+\begin{block}{6 \enspace What still needs review?}
 \begin{itemize}
-\item Three tools and local agent interfaces are implemented in the repository.
-\item Selected-row targeting is supported; complete dataset, model, and row provenance remains future work.
-\item PDF layouts, repeated results, and heuristic value selection still require human review.
-\item Agent tool-selection quality and the complete onboarding-to-validation workflow remain to be evaluated.
+\item Complex PDF layouts and repeated values.
+\item Complete dataset / model / row provenance.
+\item End-to-end agent and reproduction quality.
 \end{itemize}
 \end{block}
-\vspace{0.6cm}
-
-\begin{alertblock}{7 \enspace Next steps}
-\begin{enumerate}
-\item Build a manually annotated set of metrics, values, and source locations across papers.
-\item Evaluate metric precision/recall, value correctness, and experimental-context matching.
-\item Integrate the three tools into the broader empirical framework and evaluate end-to-end defense reproduction and validation.
-\end{enumerate}
+\vspace{0.9cm}
+\begin{alertblock}{7 \enspace Next milestone}
+\textbf{Annotate} paper evidence $\rightarrow$ \textbf{evaluate} extraction $\rightarrow$ \textbf{integrate} into Landseer, the empirical framework under development.
 \end{alertblock}
-\vspace{0.6cm}
-
+\vspace{0.9cm}
 \begin{block}{Takeaway}
-Agentic onboarding can help connect published ML defense evaluations to structured, reviewable reference records.
-
-Our prototype implements metric extraction, record initialization, and validated value insertion. The next milestone is to evaluate these tools within an integrated reproduction and validation workflow.
+\textbf{From reading papers to reusable reference records.}\\
+Three tools support one step toward agentic defense onboarding.
 \end{block}
-\vspace{0.3cm}
-
+\vspace{0.8cm}
 \begin{block}{References}
 {\fontsize{21}{27}\selectfont
 [1] Han et al. \emph{FFB: A Fair Fairness Benchmark for In-Processing Group Fairness Methods}. ICLR 2024. \href{https://arxiv.org/abs/2306.09468}{arXiv:2306.09468}.\par
-[2] Team repository, code snapshot \texttt{87a5b30}, Nov. 2, 2026. \href{https://github.com/Auspr7ng/fair_fairness_benchmark}{Auspr7ng/fair\_fairness\_benchmark}.\par
-[3] \emph{Landseer Agent Tools}, shared project workbook, team worksheets.\par
-}
+[2] \href{https://github.com/Auspr7ng/fair_fairness_benchmark}{Team repository}. Implementation snapshot: \texttt{87a5b30}.\par
+[3] \emph{Landseer Agent Tools}, shared project workbook.}
 \end{block}
 \end{column}
 \separatorcolumn

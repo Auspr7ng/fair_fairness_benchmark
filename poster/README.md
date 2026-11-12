@@ -72,3 +72,7 @@ Changed the four-team diagram to place Team 1 relative to Team 3’s bottom edge
 ### Basic-validation wording (November 8, 2026)
 
 At the user’s request, replaced the five-metric demonstration panel with a concise basic-validation statement covering the four instructor-provided PDFs. The status is supplied by the user; no new accuracy percentage or end-to-end reproduction result is claimed. This supersedes the older five-name panel described in earlier entries.
+
+### Visual simplification (November 11, 2026)
+
+Shortened motivation, tool descriptions, caveats, and next steps. Retained both workflow diagrams with shorter node labels. Added editable vector illustrations for three simultaneous guarantees and the four instructor-provided PDFs, plus tool input/output cards. PDF icons are schematic, not paper screenshots; checks visualize the existing user-reported basic-validation statement and introduce no numerical accuracy claim. All artwork is native TikZ and requires no new image dependencies.
