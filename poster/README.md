@@ -17,9 +17,9 @@ The output is `build/main.pdf`. Generated PDFs and compiler files are ignored.
 ## Content and evidence
 
 - Team 2: metric extraction, reference-value initialization, and validated JSON record updates.
-- Cross-team context follows the shared *Landseer Agent Tools* workbook: Team 1 environment preparation, Team 3 repository/model adaptation, Team 4 reproduction and validation.
+- The current poster describes functional onboarding roles without team numbering and cites Landseer’s architecture.
 - Implementation descriptions were checked against repository snapshot `87a5b301c5aca2775e9d210042a21a07fc038493` (November 2, 2026).
-- The current basic-validation statement is user-reported: extracted metric information matches the corresponding content in all four instructor-provided PDFs. This editing pass did not independently rerun that validation.
+- Current evidence: a November 12 deterministic smoke check read all four PDFs and returned metric candidates; see `evidence/`. This does not establish extraction accuracy.
 - Landseer integration and end-to-end validation are future work.
 
 ## Before final submission
@@ -80,3 +80,13 @@ Shortened motivation, tool descriptions, caveats, and next steps. Retained both 
 ### Motivation text restored (November 11, 2026)
 
 Restored the previous three-paragraph motivation under “Why onboarding matters” and removed only its guarantee illustration, as requested. Other simplified text and visuals are unchanged.
+
+### Mentor-feedback revision (November 12, 2026)
+
+Rebuilt the narrative for a multidisciplinary audience: everyday ML applications → attacks and consequences → defenses and composition → Landseer → agentic onboarding. Removed team numbers and the four-team diagram. Added Landseer Figure 1 with author/figure/arXiv attribution (CC BY 4.0), an original agent/tool/evidence-loop illustration, and an original paper-table-to-JSON illustration. Colored visual paths distinguish paper tools, broader runtime tools, and validation. Prose is now primarily bullet points.
+
+Replaced decorative PDF/check icons and the earlier broad consistency statement with a current four-PDF deterministic smoke check (`evidence/paper-check-2026-11-12.json`): text read and nonempty metric candidates in all four; candidate counts 5/3/2/3 for FFB/IPMix/EP-BNP/UAP with top_k=5. This is execution coverage, not accuracy or proof of agreement with every source result. No live agent-comparison scores exist for this revision, so comparison remains planned. The historical ZIP describes another development branch and is not presented as current-code performance.
+
+Landseer Figure 1 source: https://arxiv.org/html/2605.27148v1/overview-v4.png
+Paper: https://arxiv.org/abs/2605.27148
+The figure is reproduced without modification. AI drafting/layout assistance is acknowledged; substantial author review and final editing are still required before presentation.

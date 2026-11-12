@@ -2,7 +2,7 @@
 
 This repository organizes the published [Fair Fairness Benchmark (FFB)](https://github.com/ahxt/fair_fairness_benchmark) code alongside our group's reproduction work and supporting tools. The original benchmark is a framework for evaluating in-processing group fairness methods. Our work here is an extension and organization of that code, not a claim that we reproduced every result in the paper.
 
-Last updated: November 11, 2026. Team 2 focuses on paper-analysis tools for a planned Landseer integration; FFB is the local development and demonstration setting.
+Last updated: November 12, 2026. Team 2 focuses on paper-analysis tools for a planned Landseer integration; FFB is the local development and demonstration setting.
 
 ## Progress at a glance
 
@@ -16,7 +16,7 @@ Last updated: November 11, 2026. Team 2 focuses on paper-analysis tools for a pl
 | Local repository agent | [`team/agent/`](team/agent/) | A basic Ollama/LangChain agent can list the available reproduction scripts, list a paper's evaluation metrics, and read or update a selected metric record. It can also initialize the selected record when explicitly requested. It is not yet an automated experiment runner. |
 
 | Paper-to-record pipeline | [`team/paper_pipeline.py`](team/paper_pipeline.py) | Connects metric selection and value initialization to persisted JSON without an agent server; reports unresolved values and selection source. |
-| Team 2 poster | [`poster/main.tex`](poster/main.tex) and [build/evidence notes](poster/README.md) | Purdue-themed working draft covering our three tools and cross-team roles. Five extracted metric names are a team-reported preliminary demonstration, not an accuracy score. |
+| Team 2 poster | [`poster/main.tex`](poster/main.tex) and [build/evidence notes](poster/README.md) | Mentor-feedback revision: high-level ML risk motivation, cited Landseer architecture, agentic onboarding and paper-to-JSON illustrations, and current four-PDF execution checks. Accuracy and live agent comparisons remain unmeasured. |
 
 ## Repository map
 
@@ -76,6 +76,8 @@ The code in `ffb/src/`, `ffb/benchmark/`, `ffb/datasets/`, `ffb/tutorial/`, and 
 | Nov 11, 2026 | [Poster](poster/main.tex) | Reduced prose and added vector guarantee / PDF illustrations and tool cards, retaining both workflow diagrams. |
 
 | Nov 11, 2026 | [Poster motivation](poster/main.tex) | Restored the previous motivation prose; retained the other simplified sections and illustrations. |
+
+| Nov 12, 2026 | [Poster](poster/main.tex), [evaluation evidence](poster/evidence/paper-check-2026-11-12.json) | Reworked the narrative and diagrams following mentor feedback; cited Landseer Figure 1 and recorded current four-PDF execution checks without claiming accuracy or agent-comparison scores. |
 
 ## Try the current work
 

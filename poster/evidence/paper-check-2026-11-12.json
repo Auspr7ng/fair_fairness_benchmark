@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-12",
+  "mode": "dictionary; top_k=5",
+  "scope": "Smoke check only: no annotated ground truth, value verification, or live agent comparison.",
+  "papers": [
+    {
+      "paper": "FFB_ICLR2024_arXiv2306.09468v2.pdf",
+      "sha256": "952dc68e9d39fcb529903af661a4192c00182e6f61f07bf83befb7c28b1c0e81",
+      "text_read": true,
+      "metric_candidates": [
+        "Accuracy",
+        "Demographic Parity",
+        "Equalized Odds",
+        "Balance for Negative Class",
+        "Equal Opportunity"
+      ],
+      "source": "dictionary"
+    },
+    {
+      "paper": "Fingerprinting_DNN_UAP_CVPR2022.pdf",
+      "sha256": "28c4817dba5521f32b930817b1c2e9cff4066454d3a1e817fa1c53f8dc54a105",
+      "text_read": true,
+      "metric_candidates": [
+        "AUC",
+        "Accuracy",
+        "Attack Success Rate"
+      ],
+      "source": "dictionary"
+    },
+    {
+      "paper": "IPMix_NeurIPS2023.pdf",
+      "sha256": "54f5882e3044e1097d004b4bc938892092c35db6be7297a46902a54ddbb909b9",
+      "text_read": true,
+      "metric_candidates": [
+        "Accuracy",
+        "PR-AUC",
+        "ECE"
+      ],
+      "source": "dictionary"
+    },
+    {
+      "paper": "Preactivation_Backdoor_Neurons_NeurIPS2022.pdf",
+      "sha256": "cc072a9b42df2ca0628892f29b164e2f53bc83e89419d431f973e17019d23dab",
+      "text_read": true,
+      "metric_candidates": [
+        "Attack Success Rate",
+        "Accuracy"
+      ],
+      "source": "dictionary"
+    }
+  ]
+}
