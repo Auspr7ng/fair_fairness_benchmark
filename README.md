@@ -75,6 +75,8 @@ The code in `ffb/src/`, `ffb/benchmark/`, `ffb/datasets/`, `ffb/tutorial/`, and 
 
 | Nov 11, 2026 | [Poster](poster/main.tex) | Reduced prose and added vector guarantee / PDF illustrations and tool cards, retaining both workflow diagrams. |
 
+| Nov 11, 2026 | [Poster motivation](poster/main.tex) | Restored the previous motivation prose; retained the other simplified sections and illustrations. |
+
 ## Try the current work
 
 Run the following commands from the repository root. Each component has its own requirements; the data and Ollama model are not included in the repository.

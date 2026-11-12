@@ -107,19 +107,11 @@
 \separatorcolumn
 \begin{column}{\colwidth}
 \begin{block}{1 \enspace Why onboarding matters}
-\begin{center}
-\begin{tikzpicture}[x=1cm,y=1cm]
-\tikzset{guarantee/.style={draw=PurdueBlack,fill=PurdueLight,line width=1.5pt,circle,minimum size=7.6cm,align=center,font=\fontsize{28}{34}\selectfont\bfseries}}
-\node[guarantee] (privacy) at (-10,0) {Privacy};
-\node[guarantee,fill=PurdueGold] (robust) at (0,0) {Robustness};
-\node[guarantee] (fair) at (10,0) {Fairness};
-\node[draw,fill=PurdueBlack,text=white,text width=26cm,align=center,inner sep=0.6cm,font=\fontsize{30}{36}\selectfont] (ml) at (0,-8) {\textbf{One ML system. Multiple guarantees.}};
-\draw[->,line width=2pt] (privacy.south)--(ml.north -| privacy.south);
-\draw[->,line width=2pt] (robust.south)--(ml.north);
-\draw[->,line width=2pt] (fair.south)--(ml.north -| fair.south);
-\end{tikzpicture}
-\end{center}
-Defenses can interact. Studying their combined effects requires bringing diverse tools into a common evaluation workflow.
+Real-world machine learning systems may need to provide \textbf{privacy, robustness, and fairness simultaneously}. Defenses designed for individual guarantees can interact, changing their combined effects.
+
+To study these interactions empirically, existing defenses must be brought into a common evaluation workflow. This \textbf{onboarding} is difficult: research papers and implementations use different metrics, experimental settings, and reporting formats.
+
+We are developing \textbf{agentic onboarding tools} for this broader effort. Our team's focus is the paper-analysis step: identifying evaluation metrics and organizing reported values into reference records for later validation.
 \end{block}
 \vspace{0.8cm}
 \begin{alertblock}{Our goal}

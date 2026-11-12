@@ -76,3 +76,7 @@ At the user’s request, replaced the five-metric demonstration panel with a con
 ### Visual simplification (November 11, 2026)
 
 Shortened motivation, tool descriptions, caveats, and next steps. Retained both workflow diagrams with shorter node labels. Added editable vector illustrations for three simultaneous guarantees and the four instructor-provided PDFs, plus tool input/output cards. PDF icons are schematic, not paper screenshots; checks visualize the existing user-reported basic-validation statement and introduce no numerical accuracy claim. All artwork is native TikZ and requires no new image dependencies.
+
+### Motivation text restored (November 11, 2026)
+
+Restored the previous three-paragraph motivation under “Why onboarding matters” and removed only its guarantee illustration, as requested. Other simplified text and visuals are unchanged.
