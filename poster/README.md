@@ -90,3 +90,7 @@ Replaced decorative PDF/check icons and the earlier broad consistency statement 
 Landseer Figure 1 source: https://arxiv.org/html/2605.27148v1/overview-v4.png
 Paper: https://arxiv.org/abs/2605.27148
 The figure is reproduced without modification. AI drafting/layout assistance is acknowledged; substantial author review and final editing are still required before presentation.
+
+### Selective visual revision (November 14, 2026)
+
+Preserved the Landseer system overview and paper-evidence-to-JSON illustration without changing their contents. Replaced the robot-style onboarding illustration with the earlier two-branch handoff structure, using functional names rather than team numbers. Restored bullet-point motivation and evaluation explanations. Kept current measured execution-check scope and planned-integration labels.
