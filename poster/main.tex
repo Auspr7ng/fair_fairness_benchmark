@@ -152,6 +152,35 @@
 \item \textbf{Our focus:} automate paper metric extraction and reference-record preparation.
 \end{itemize}
 \end{alertblock}
+\vspace{0.8cm}
+\begin{block}{Why reading a paper is not enough}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm]
+% Three schematic examples; no experimental values are shown.
+\fill[OceanLight] (-16,-5) rectangle (-6,2);
+\fill[PlumLight] (-5,-5) rectangle (5,2);
+\fill[LeafLight] (6,-5) rectangle (16,2);
+\node[smalllab,text=Ocean,font=\fontsize{23}{29}\selectfont\bfseries] at (-11,0.8) {Many results};
+\node[smalllab] at (-11,-2.2) {Model A: Accuracy\\Model B: Accuracy\\Dataset C: Accuracy};
+\node[smalllab,text=Plum,font=\fontsize{23}{29}\selectfont\bfseries] at (0,0.8) {Different names};
+\node[smalllab] at (0,-2.2) {Accuracy\\ACC\\Classification accuracy};
+\node[smalllab,text=Leaf,font=\fontsize{23}{29}\selectfont\bfseries] at (11,0.8) {Complex layouts};
+\draw[draw=Leaf,line width=1.2pt] (7.4,-4) rectangle (14.6,-0.5);
+\foreach \y in {-1.1,-1.7,-2.3,-2.9,-3.5}{
+\draw[draw=Leaf] (8,\y)--(10.4,\y);
+\draw[draw=Leaf] (11.5,\y)--(14,\y);}
+\foreach \x in {-11,0,11}{\draw[arr] (\x,-5.3)--(\x,-6.7);}
+\node[smalllab,text width=9.8cm] at (-11,-8.5) {Select the right\\experiment context};
+\node[smalllab,text width=9.8cm] at (0,-8.5) {Recognize equivalent\\metric names};
+\node[smalllab,text width=9.8cm] at (11,-8.5) {Recover text and\\table structure};
+\end{tikzpicture}
+\end{center}
+{\fontsize{21}{27}\selectfont Illustrative examples of onboarding challenges; not measured results.}
+\vspace{0.5cm}
+\begin{beamercolorbox}[sep=0.5cm,center]{block body alerted}
+\textbf{Finding a number is easy.\\Knowing what it measures is harder.}
+\end{beamercolorbox}
+\end{block}
 \end{column}
 \separatorcolumn
 \begin{column}{\colwidth}

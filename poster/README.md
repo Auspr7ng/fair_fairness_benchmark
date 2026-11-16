@@ -94,3 +94,7 @@ The figure is reproduced without modification. AI drafting/layout assistance is 
 ### Selective visual revision (November 14, 2026)
 
 Preserved the Landseer system overview and paper-evidence-to-JSON illustration without changing their contents. Replaced the robot-style onboarding illustration with the earlier two-branch handoff structure, using functional names rather than team numbers. Restored bullet-point motivation and evaluation explanations. Kept current measured execution-check scope and planned-integration labels.
+
+### Onboarding challenge examples (November 16, 2026)
+
+Filled the left-column space below the bottleneck with three schematic examples: repeated metric names across experiments, naming aliases, and two-column PDF layouts. Each example points to the required interpretation step. No numerical data are invented; the figure is explicitly illustrative. Added a short takeaway about identifying what a reported number measures.
