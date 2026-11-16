@@ -80,9 +80,9 @@ def normalize_metric(name: str) -> str | None:
 
 
 
-def find_requested_metrics(text: str, wanted) -> list[Match]:
+def find_requested_metrics(text: str, wanted, context_given: bool = True) -> list[Match]:
     """Match known aliases plus exact custom names explicitly requested by callers."""
-    matches = find_metrics(text, context_given=True)
+    matches = find_metrics(text, context_given=context_given)
     for name in wanted:
         if normalize_metric(name):
             continue

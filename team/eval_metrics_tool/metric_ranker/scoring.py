@@ -4,7 +4,8 @@ import re
 from collections import Counter
 from dataclasses import dataclass, field
 
-from team.eval_metrics_tool.metric_matcher import find_metrics
+from team.eval_metrics_tool.metric_matcher import find_metrics, find_requested_metrics
+from .evidence import MetricEvidence, use_evidence
 from team.eval_metrics_tool.section_splitter import (ABSTRACT, RELATED, REFERENCES, RESULTS,
                                                      PaperContent, Section, Table)
 
@@ -35,18 +36,23 @@ class MetricScore:
     score: int = 0
     where: Counter = field(default_factory=Counter)  # location -> mention count
     example: str = ""
+    reported: bool = False
+    evidence: list[MetricEvidence] = field(default_factory=list)
 
 
-def _record(scores: dict, metric: str, location: str, weight: int, snippet: str):
+def _record(scores: dict, metric: str, location: str, weight: int, evidence: MetricEvidence):
     if weight <= 0:
         return
     s = scores.setdefault(metric, MetricScore(metric))
     s.score += weight
     s.where[location] += 1
-    s.example = s.example or snippet.strip()[:80]
+    s.example = s.example or evidence.text
+    s.reported = s.reported or evidence.reported
+    if evidence not in s.evidence:
+        s.evidence.append(evidence)
 
 
-def _score_prose(section: Section, scores: dict):
+def _score_prose(section: Section, scores: dict, requested=()):
     key = _SECTION_KEY.get(section.kind, "other")
     lines = section.text.splitlines()
     i = 0
@@ -62,8 +68,12 @@ def _score_prose(section: Section, scores: dict):
         loc, weight = ("caption", WEIGHTS["caption"]) if in_caption else (key, WEIGHTS[key])
         if WEIGHTS[key] == 0:
             weight = 0
-        for m in find_metrics(line):
-            _record(scores, m.metric, loc, weight, line)
+        matches = (find_requested_metrics(line, requested, context_given=False)
+                 if requested else find_metrics(line))
+        for m in matches:
+            evidence = use_evidence(line, m, section.kind, loc)
+            if evidence is not None:
+                _record(scores, m.metric, loc, weight, evidence)
         i += 1
 
 
@@ -76,7 +86,7 @@ def _header_row_count(rows: list[list[str]]) -> int:
     return max(n, 1)
 
 
-def _score_table(table: Table, scores: dict):
+def _score_table(table: Table, scores: dict, requested=()):
     if WEIGHTS[_SECTION_KEY.get(table.section, "other")] == 0:
         return
     n_header = _header_row_count(table.rows)
@@ -87,18 +97,31 @@ def _score_table(table: Table, scores: dict):
             is_header = r < n_header or (c == 0 and len(table.rows) > 1)
             loc, weight = (("table_header", WEIGHTS["table_header"]) if is_header
                            else ("table_cell", WEIGHTS["table_cell"]))
-            for m in find_metrics(cell, context_given=True):
+            matches = (find_requested_metrics(cell, requested) if requested
+                       else find_metrics(cell, context_given=True))
+            for m in matches:
                 # Row labels (first column) only count if the cell *is* the metric.
                 if c == 0 and r >= n_header and len(cell) > m.end - m.start + 12:
                     continue
-                _record(scores, m.metric, loc, weight, cell)
+                values = any(_NUMERIC_CELL.match(data[c]) for data in table.rows[n_header:]
+                             if c < len(data))
+                if c == 0 and r >= n_header:
+                    values = any(_NUMERIC_CELL.match(v) for v in row[1:])
+                evidence = use_evidence(cell, m, table.section, loc, page=table.page or None,
+                                        row=r+1, column=c+1, table_has_values=values)
+                if evidence is not None:
+                    _record(scores, m.metric, loc, weight, evidence)
 
 
-def rank_metrics(content: PaperContent) -> list[MetricScore]:
-    """All detected metrics, best first; ties broken alphabetically."""
+def rank_metrics(content: PaperContent, *, requested=()) -> list[MetricScore]:
+    """Candidates with evidence; reported uses precede unconfirmed mentions.
+
+    Within each group, sort by weighted score then name. ``requested`` allows
+    evidence checks for exact custom metric names proposed by a model.
+    """
     scores: dict[str, MetricScore] = {}
     for section in content.sections:
-        _score_prose(section, scores)
+        _score_prose(section, scores, requested)
     for table in content.tables:
-        _score_table(table, scores)
-    return sorted(scores.values(), key=lambda s: (-s.score, s.name))
+        _score_table(table, scores, requested)
+    return sorted(scores.values(), key=lambda s: (-s.reported, -s.score, s.name))

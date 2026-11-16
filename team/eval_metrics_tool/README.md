@@ -59,6 +59,10 @@ fallback returns canonical names. When the tool falls back, it issues a
 `UserWarning` that says why. Raises `FileNotFoundError` for a missing file and
 `team.eval_metrics_tool.pdf_reader.PDFReadError` for a file that is not a readable PDF.
 
+Canonical names preserve important distinctions: `Top-1 Error` and
+`Top-5 Error` are separate from accuracy; `Average Precision` (AP) is separate
+from `mAP` (mean average precision). No numeric conversion is performed.
+
 ```bash
 python -m team.eval_metrics_tool.metric_extractor paper.pdf --model ollama/qwen3:4b   # one metric per line
 python -m team.eval_metrics_tool.metric_extractor paper.pdf --show-section            # print the text sent to the LLM
@@ -108,6 +112,12 @@ LLM path:
    and parses it, ignoring `<think>` blocks from reasoning models. It asks for
    temperature 0. Models that reject that setting (Claude 5, OpenAI reasoning
    models) run at their default instead of failing.
+4. `metric_selector` checks proposed names against accepted paper evidence,
+   including exact custom names outside the dictionary. It filters unsupported,
+   explicitly negated, other-work, and training-only-loss uses. If every name
+   is rejected, it explains why and falls back to the dictionary. Raw model
+   wording is retained for supported names; unsupported aliases are not silently
+   changed into a different metric.
 
 Dictionary fallback:
 
@@ -124,8 +134,13 @@ Dictionary fallback:
    not also "Accuracy"). Short ambiguous acronyms (EM, IS, R2, AP, ...) are
    case-sensitive and count in running text only when a number follows
    ("EM = 85.2"), or anywhere in a table.
-3. `metric_ranker` sums weights per canonical metric, sorts by score and breaks
-   ties alphabetically. Weights live in the `WEIGHTS` dict at the top of
+3. `metric_ranker` excludes clear negations, other-work claims, training-only
+   losses, and explicitly described background. Each accepted mention retains
+   its clause or table location in `MetricScore.evidence`. Reported-use evidence
+   sorts before unconfirmed background mentions; within each group, sort by
+   weighted score and then name. `metric_selector` returns only candidates with
+   `reported=True`, so repeated weak mentions cannot win or fill the result list.
+   Weights live in the `WEIGHTS` dict at the top of
    `metric_ranker/scoring.py` (heuristic, meant to be tuned):
 
    | Where | Weight |
@@ -141,6 +156,20 @@ Extraction and scoring are separate: `rank_metrics(PaperContent(...))` and
 `experiments_section(PaperContent(...))` work on plain strings and lists, so most
 tests need no PDFs. LLM tests use a fake `litellm` module (`tests/conftest.py`),
 so they need no network or key.
+
+### Inspecting supporting evidence
+
+`select_metrics(content, use_llm=False).evidence` maps returned names to
+`MetricEvidence` records. Each includes source text, matched wording, section,
+basis, and (for a detected table) page, row, and column. The same mapping is
+available for supported model results. `--verbose` prints this evidence.
+`rank_metrics` / `rank_pdf` also expose unconfirmed candidates for inspection;
+normal `extract_eval_metrics` output filters those candidates out.
+
+Reported-use support includes a reporting statement, a nearby value, a table
+with values, or non-excluded results/caption context. These are language rules,
+not a proof of ownership or correctness. Clause splitting prevents a negation
+about one metric from automatically rejecting a later positive clause.
 
 ## Adding a metric
 
@@ -185,6 +214,10 @@ they need no network, API key or local model. They also never read your `.env`.
 - Table text also appears in the page text, so table mentions are partly counted twice.
 - Metrics referred to only by symbols or nonstandard names are missed.
 - Words like "precision" or "recall" in a non-metric sense can still slip through despite basic filters.
+- Evidence and relevance checks are heuristic. Unusual negation, attribution,
+  and PDF reading order can cause false positives or false negatives. Results
+  context is an inference of reported use, not a guarantee. Inspect the cited
+  evidence; a live model is still not independently verified by these rules.
 - Section detection is heading-regex based and imperfect; a missed "Related Work" heading means its metrics count.
 
 ### Shared extraction decision

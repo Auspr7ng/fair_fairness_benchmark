@@ -46,7 +46,7 @@ def test_short_acronym_traps():
 
 def test_short_acronyms_with_number_context():
     assert names("EM = 85.2 on SQuAD") == ["Exact Match"]
-    assert names("an AP of 41.0") == ["mAP"]
+    assert names("an AP of 41.0") == ["Average Precision"]
     assert names("R2: 0.91") == ["R²"]
     assert names("IS of 9.5") == ["Inception Score"]
 
