@@ -55,35 +55,7 @@ The code in `ffb/src/`, `ffb/benchmark/`, `ffb/datasets/`, `ffb/tutorial/`, and 
 | Oct 26, 2026 | [Shared tool logic](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/3efc8957cd63a62184de0f9452f2f51c3a254e53) | Consolidated record-update validation and extractor fallback behavior. |
 | Nov 2, 2026 | [Component organization](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/cf8060fc425deb821ecc797e243564858c969e12) and [section-selection fixes](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/46fe084fcd66bdd3f8e3b85449d3d8c64d9cd735) | Split extraction/initialization components, recover mixed-column experiment headings, and surface empty model-output warnings. |
 | Nov 2, 2026 | [Pipeline fixes](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/87a5b301c5aca2775e9d210042a21a07fc038493) and [limitations](PIPELINE_BLOCKERS.md) | Added offline paper-to-record persistence, selected-record initialization, atomic JSON writes, nullable metric handling, and training-launch checks. Commit validation reports 158 tests and 19 subtests; live inference and full torch training were unavailable. |
-| Nov 2, 2026 | [Poster draft](https://github.com/Auspr7ng/fair_fairness_benchmark/commit/dd65842a8362394e75424670299b623327188185) | Added Team 2's Purdue LaTeX draft, cross-team context, build instructions, and generated-file exclusions. Desktop LaTeX compilation passed; author details and demonstration evidence remain to be finalized. |
-
-| Nov 8, 2026 | [Poster source](poster/main.tex) and [logo assets](poster/images/) | Replaced the text-only poster header with Purdue’s official horizontal logo; retained source SVG and LaTeX-ready PNG. |
-
-| Nov 8, 2026 | [Poster author line](poster/main.tex) and [review notes](poster/README.md) | Checked GitHub for new updates (none beyond the logo commit) and added the six Team 2 members from the supplied roster. No new experiment-result claims. |
-
-| Nov 8, 2026 | [Poster](poster/main.tex) and [source notes](poster/README.md) | Clarified project-wide model/data targets, assigned papers versus tool roles, the reported local agent demonstration, and the planned FFB comparison using Slack context. |
-
-| Nov 8, 2026 | [Poster](poster/main.tex) and [alignment notes](poster/README.md) | Aligned the poster with the abstract: agentic onboarding motivation, explicit inputs/outputs for three tools, preliminary five-name demonstration, and future integration. |
-
-| Nov 8, 2026 | [Poster workflow diagram](poster/main.tex) | Added a four-team context diagram highlighting Team 2 and marking cross-team handoffs as proposed integration. |
-
-| Nov 8, 2026 | [Poster diagrams](poster/main.tex) | Restored the detailed Team 2 paper-to-record figure alongside the four-team overview. |
-
-| Nov 8, 2026 | [Poster layout](poster/main.tex) | Fixed overlapping team boxes and the execution-environment label using edge-based spacing. |
-
-| Nov 8, 2026 | [Poster validation section](poster/main.tex) | Simplified the result panel to user-reported basic validation against four instructor-provided PDFs; this editing pass did not rerun validation. |
-
-| Nov 11, 2026 | [Poster](poster/main.tex) | Reduced prose and added vector guarantee / PDF illustrations and tool cards, retaining both workflow diagrams. |
-
-| Nov 11, 2026 | [Poster motivation](poster/main.tex) | Restored the previous motivation prose; retained the other simplified sections and illustrations. |
-
-| Nov 12, 2026 | [Poster](poster/main.tex), [evaluation evidence](poster/evidence/paper-check-2026-11-12.json) | Reworked the narrative and diagrams following mentor feedback; cited Landseer Figure 1 and recorded current four-PDF execution checks without claiming accuracy or agent-comparison scores. |
-
-| Nov 14, 2026 | [Poster](poster/main.tex) | Kept the Landseer and paper-to-JSON figures, restored a two-branch functional handoff diagram, and used bullet points for the other explanations. |
-
-| Nov 16, 2026 | [Poster](poster/main.tex) | Added illustrative onboarding challenges below the bottleneck: experimental context, metric aliases, and PDF layout. |
-
-| Nov 16, 2026 | [Poster layout](poster/main.tex) | Reduced left-column illustration height and spacing to prevent the takeaway from being covered by the footer. |
+| Nov 2–16, 2026 | [Research poster](poster/main.tex) and [evaluation evidence](poster/evidence/) | Prepared the Purdue Expo poster on agentic defense onboarding, with Landseer context, tool diagrams, and a four-paper execution check. |
 
 ## Try the current work
 
@@ -156,7 +128,7 @@ By default the agent answers one demonstration question by calling a tool that l
 
 ## Documentation updates
 
-For each project update, revise the affected component README and keep this overview's status, usage, and repository map consistent. Append a dated development milestone with a commit or file link and the relevant validation evidence. Keep earlier milestones, distinguish implemented functionality from planned work, and label upstream results and team demonstrations accurately. Poster-specific evidence and unfinished submission details belong in [`poster/README.md`](poster/README.md).
+For each project update, revise the affected component README and keep this overview's status, usage, and repository map consistent. Record meaningful milestones with a date, source link, and relevant validation evidence. Consolidate routine wording, formatting, and layout changes instead of logging each edit. Distinguish implemented functionality from planned work, and label upstream results and team demonstrations accurately. Poster-specific evidence and unfinished submission details belong in [`poster/README.md`](poster/README.md).
 
 ## Attribution
 
