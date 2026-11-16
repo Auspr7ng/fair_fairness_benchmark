@@ -1,7 +1,6 @@
 import pytest
 
-from eval_metrics.matcher import find_metrics, normalize_metric
-from eval_metrics.metrics_dictionary import METRICS
+from team.eval_metrics_tool.metric_matcher import METRICS, find_metrics, normalize_metric
 
 
 @pytest.mark.parametrize("alias", ["F-measure", "F1-score", "F1 score", "macro-F1",
@@ -47,7 +46,7 @@ def test_short_acronym_traps():
 
 def test_short_acronyms_with_number_context():
     assert names("EM = 85.2 on SQuAD") == ["Exact Match"]
-    assert names("an AP of 41.0") == ["mAP"]
+    assert names("an AP of 41.0") == ["Average Precision"]
     assert names("R2: 0.91") == ["R²"]
     assert names("IS of 9.5") == ["Inception Score"]
 

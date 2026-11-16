@@ -21,7 +21,7 @@ class FakeLiteLLM:
 @pytest.fixture(autouse=True)
 def no_dotenv(monkeypatch):
     """Never read the developer's real .env during tests."""
-    from eval_metrics import llm
+    from team.eval_metrics_tool.llm_metric_finder import llm
     llm.load_env.cache_clear()
     monkeypatch.setattr(llm, "find_env_file", lambda: None)
     yield

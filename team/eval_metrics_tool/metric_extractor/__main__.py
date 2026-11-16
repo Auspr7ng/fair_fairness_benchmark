@@ -1,11 +1,15 @@
 import argparse
 import sys
 
-from . import PDFReadError, extract_paper, llm_text, select_metrics
+from team.eval_metrics_tool.metric_selector import select_metrics
+from team.eval_metrics_tool.pdf_reader import PDFReadError
+from team.eval_metrics_tool.section_selector import llm_text
+
+from . import extract_paper
 
 
 def main(argv=None) -> int:
-    p = argparse.ArgumentParser(prog="eval_metrics",
+    p = argparse.ArgumentParser(prog="python -m team.eval_metrics_tool.metric_extractor",
                                 description="List the main evaluation metrics a paper reports.")
     p.add_argument("pdf")
     p.add_argument("--top-k", type=int, default=5)
@@ -19,7 +23,7 @@ def main(argv=None) -> int:
                    help="print what the LLM is sent (the Experiments section, or the "
                         "paper body if it has none) and exit")
     p.add_argument("--verbose", action="store_true",
-                   help="dictionary ranking: also print each metric's score and where it was found")
+                   help="also print the supporting sentence or table location; dictionary scores when available")
     args = p.parse_args(argv)
     if args.top_k < 1:
         p.error("--top-k must be >= 1")
@@ -39,10 +43,25 @@ def main(argv=None) -> int:
         for s in result.scores:
             where = ", ".join(f"{loc} x{n}" for loc, n in s.where.most_common())
             print(f"{s.name}\tscore={s.score}\t{where}\te.g. {s.example!r}")
+            _print_evidence(s.evidence)
+    elif args.verbose:
+        for name in result.names:
+            print(name)
+            _print_evidence(result.evidence.get(name,[]))
     else:
         for name in result.names:
             print(name)
     return 0
+
+
+def _print_evidence(evidence):
+    for item in evidence:
+        if not item.reported:
+            continue
+        where=f"section={item.section}"
+        if item.page is not None:
+            where+=f", page={item.page}, row={item.row}, column={item.column}"
+        print(f"  evidence: {where}; {item.basis}; {item.text!r}")
 
 
 if __name__ == "__main__":

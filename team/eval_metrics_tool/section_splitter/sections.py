@@ -1,7 +1,7 @@
-"""Heading-based section splitting. Plain-text in, plain-text out."""
+"""Heading-based section splitting, and assembling pages into a structured paper."""
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 # Section kinds. Anything not recognised is "other".
 ABSTRACT, INTRO, RELATED, METHOD, RESULTS, CONCLUSION, REFERENCES, OTHER = (
@@ -53,6 +53,19 @@ class Section:
     end: int
 
 
+@dataclass
+class Table:
+    rows: list[list[str]]
+    section: str = OTHER  # section kind the table's page mostly belongs to
+    page: int = 0
+
+
+@dataclass
+class PaperContent:
+    sections: list[Section]
+    tables: list[Table] = field(default_factory=list)
+
+
 def classify_heading(line: str) -> str | None:
     if _COLUMN_REFERENCES.match(line):
         return REFERENCES
@@ -83,4 +96,25 @@ def split_sections(text: str) -> list[Section]:
     if pos > start or not sections:
         sections.append(Section(kind, heading, text[start:pos], start, pos))
     return sections
+
+
+def build_paper(pages) -> PaperContent:
+    """Split a list of pages into sections and tag each table with its section.
+
+    Each page needs ``.text`` and ``.tables`` (see ``pdf_reader.PdfPage``).
+    """
+    full_text = "\n".join(page.text for page in pages)
+    sections = split_sections(full_text)
+
+    # Attribute each page's tables to the section covering most of that page.
+    tables: list[Table] = []
+    offset = 0
+    for i, page in enumerate(pages):
+        lo, hi = offset, offset + len(page.text)
+        offset = hi + 1
+        if not page.tables:
+            continue
+        kind = max(sections, key=lambda s: max(0, min(hi, s.end) - max(lo, s.start))).kind
+        tables.extend(Table(rows=t, section=kind, page=i + 1) for t in page.tables if t)
+    return PaperContent(sections=sections, tables=tables)
 

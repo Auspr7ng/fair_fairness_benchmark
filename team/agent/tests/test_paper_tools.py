@@ -12,8 +12,8 @@ from langchain_core.messages import AIMessage, ToolMessage
 
 from team.agent import paper_tools
 from team.agent.basic_agent import build_agent
-from team.eval_metrics_tool.eval_metrics import PaperContent, llm
-from team.eval_metrics_tool.eval_metrics.sections import split_sections
+from team.eval_metrics_tool.llm_metric_finder import llm
+from team.eval_metrics_tool.section_splitter import PaperContent, split_sections
 
 PAPER = PaperContent(split_sections(
     "Abstract\nWe report accuracy.\n4 Experiments\nTable 1: Accuracy and F1 on Adult.\n"))
@@ -62,10 +62,9 @@ class PaperToolTests(unittest.TestCase):
         self.extract.assert_called_once_with("paper.pdf")
 
     def test_model_failure_uses_shared_fallback(self):
-        from team.eval_metrics_tool import eval_metrics as extractor
-        from team.eval_metrics_tool.eval_metrics import selection
+        from team.eval_metrics_tool.metric_selector import select_metrics, selection
         with patch.object(selection, "llm_metrics", return_value=(None, "model failed")):
-            expected = extractor.select_metrics(PAPER, top_k=1)
+            expected = select_metrics(PAPER, top_k=1)
             result = json.loads(paper_tools.find_eval_metrics.invoke({"pdf_path": "paper.pdf", "top_k": 1}))
         self.assertEqual(result["metrics"], expected.names)
         self.assertEqual(result["source"], expected.source)

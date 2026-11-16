@@ -1,6 +1,6 @@
-# eval_metrics
+# eval_metrics_tool
 
-Extracts the most important evaluation metrics a research paper PDF reports.
+A set of small tools that together extract the most important evaluation metrics a research paper PDF reports.
 The tool sends the paper's Experiments section to an LLM, or the whole paper
 body (minus References) when no Experiments heading is found. Any provider works through [LiteLLM](https://docs.litellm.ai/docs/providers),
 including local models via Ollama. No API key ships with this project; bring
@@ -48,7 +48,7 @@ changes to `.env.example` instead.
 ## Usage
 
 ```python
-from eval_metrics import extract_eval_metrics
+from team.eval_metrics_tool.metric_extractor import extract_eval_metrics
 extract_eval_metrics("paper.pdf", top_k=5, model="ollama/qwen3:4b")  # ["F1 score", "Accuracy"]
 extract_eval_metrics("paper.pdf", use_llm=False)                     # dictionary only
 ```
@@ -57,67 +57,91 @@ Returns metric names, most important first, or `[]` if none are found. LLM
 results use the paper's own wording (they are not normalized). The dictionary
 fallback returns canonical names. When the tool falls back, it issues a
 `UserWarning` that says why. Raises `FileNotFoundError` for a missing file and
-`eval_metrics.PDFReadError` for a file that is not a readable PDF.
+`team.eval_metrics_tool.pdf_reader.PDFReadError` for a file that is not a readable PDF.
+
+Canonical names preserve important distinctions: `Top-1 Error` and
+`Top-5 Error` are separate from accuracy; `Average Precision` (AP) is separate
+from `mAP` (mean average precision). No numeric conversion is performed.
 
 ```bash
-python -m eval_metrics paper.pdf --model ollama/qwen3:4b   # one metric per line
-python -m eval_metrics paper.pdf --show-section            # print the text sent to the LLM
-python -m eval_metrics paper.pdf --no-llm --verbose        # dictionary: + score and where found
+python -m team.eval_metrics_tool.metric_extractor paper.pdf --model ollama/qwen3:4b   # one metric per line
+python -m team.eval_metrics_tool.metric_extractor paper.pdf --show-section            # print the text sent to the LLM
+python -m team.eval_metrics_tool.metric_extractor paper.pdf --no-llm --verbose        # dictionary: + score and where found
 ```
 
-Run both from `team/eval_metrics_tool/`.
+Run both from the repository root.
 
 ## How it works
 
-### Component responsibilities
+### The tools
 
-- `__init__.py`: public Python entry points and compatibility imports.
-- `__main__.py`: command-line arguments and output formatting.
-- `extraction.py`: PDF text and table reading.
-- `sections.py`: recognizing section headings.
-- `paper_text.py`: choosing the paper text sent to the model.
-- `llm.py`: model configuration, provider calls, and reply parsing.
-- `selection.py`: one shared metric-selection and fallback policy for the API,
-  command line, and agent, including source, fallback reason, and score evidence.
-- `matcher.py` and `metrics_dictionary.py`: recognizing metric names.
-- `scoring.py`: ranking dictionary matches.
+Each pipeline step is its own package in this folder, and each can be imported
+and used by itself, for example
+`from team.eval_metrics_tool.pdf_reader import read_pdf`.
 
-The existing package imports, including `select_metrics`, `llm_metrics`,
-`MetricSelection`, `llm_text`, and `experiments_section`, remain available.
-This organization does not change metric names, output formats, or fallback rules.
+| Tool | Input → output | Main functions |
+|---|---|---|
+| `pdf_reader/` | PDF file → text and tables of each page | `read_pdf` |
+| `section_splitter/` | Pages → `PaperContent`: sections, plus tables tagged by section | `build_paper`, `split_sections` |
+| `section_selector/` | `PaperContent` → the text sent to the LLM | `llm_text`, `experiments_section` |
+| `llm_metric_finder/` | Text → metric names from an LLM (model settings, provider call, reply parsing) | `ask_llm`, `resolve_model` |
+| `metric_matcher/` | String → metric mentions found with the dictionary | `find_metrics`, `normalize_metric` |
+| `metric_ranker/` | `PaperContent` → metrics scored by where they appear | `rank_metrics` |
+| `metric_selector/` | `PaperContent` → final names, their source, any fallback reason, and score evidence | `select_metrics` |
+| `metric_extractor/` | PDF file → final names, by running all of the above; also the command line | `extract_eval_metrics`, `extract_paper` |
+
+```text
+PDF ─ pdf_reader ─ section_splitter ─┬─ section_selector ─ llm_metric_finder ─┐
+                                     │                                        ├─ metric_selector ─ names
+                                     └─ metric_ranker (metric_matcher) ───────┘
+```
+
+`metric_extractor` connects these steps, and `metric_selector` holds the one
+LLM-or-dictionary decision used by the Python API, command line, and agent.
 
 LLM path:
 
-1. pdfplumber extraction and section splitting (below).
-2. Choose the text to send (`llm_text`). This is the Experiments section: the
-   text under headings that `sections.py` classifies as Experiments / Results /
+1. `pdf_reader` and `section_splitter` read the paper (below).
+2. `section_selector` chooses the text to send (`llm_text`). This is the Experiments section: the
+   text under headings that `section_splitter` classifies as Experiments / Results /
    Evaluation (several such headings are joined). Many papers title their
    experiments by topic instead ("5 Benchmarking Current Fairness Methods").
    Without such a heading, every section except References is sent. If the
    PDF has no text at all, the dictionary fallback is used.
-3. `llm.py` asks the model for a JSON array of the metrics the paper reports
+3. `llm_metric_finder` asks the model for a JSON array of the metrics the paper reports
    and parses it, ignoring `<think>` blocks from reasoning models. It asks for
    temperature 0. Models that reject that setting (Claude 5, OpenAI reasoning
    models) run at their default instead of failing.
+4. `metric_selector` checks proposed names against accepted paper evidence,
+   including exact custom names outside the dictionary. It filters unsupported,
+   explicitly negated, other-work, and training-only-loss uses. If every name
+   is rejected, it explains why and falls back to the dictionary. Raw model
+   wording is retained for supported names; unsupported aliases are not silently
+   changed into a different metric.
 
 Dictionary fallback:
 
-1. `extraction.py` reads page text and tables with pdfplumber
+1. `pdf_reader` reads page text and tables with pdfplumber
    (`page.extract_text()`, `page.extract_tables()`). The word gap is set
    relative to font size (`X_TOLERANCE_RATIO`), because pdfplumber's fixed
-   default glues words together in tightly set papers. It then splits the text into
-   sections by heading heuristics (`sections.py`: Abstract, Introduction,
+   default glues words together in tightly set papers. `section_splitter` then splits the text into
+   sections by heading heuristics (Abstract, Introduction,
    Related Work, Method, Experiments/Results/Evaluation, Conclusion,
    References), and tags each table with the section its page mostly belongs to.
    Unrecognised text falls into an "other" section.
-2. `matcher.py` finds metric mentions using `metrics_dictionary.py`. Matches use
+2. `metric_matcher` finds metric mentions using `metrics_dictionary.py`. Matches use
    word boundaries; when patterns overlap the longest wins ("Top-1 accuracy" is
    not also "Accuracy"). Short ambiguous acronyms (EM, IS, R2, AP, ...) are
    case-sensitive and count in running text only when a number follows
    ("EM = 85.2"), or anywhere in a table.
-3. `scoring.py` sums weights per canonical metric, sorts by score and breaks
-   ties alphabetically. Weights live in the `WEIGHTS` dict at the top of that
-   file (heuristic, meant to be tuned):
+3. `metric_ranker` excludes clear negations, other-work claims, training-only
+   losses, and explicitly described background. Each accepted mention retains
+   its clause or table location in `MetricScore.evidence`. Reported-use evidence
+   sorts before unconfirmed background mentions; within each group, sort by
+   weighted score and then name. `metric_selector` returns only candidates with
+   `reported=True`, so repeated weak mentions cannot win or fill the result list.
+   Weights live in the `WEIGHTS` dict at the top of
+   `metric_ranker/scoring.py` (heuristic, meant to be tuned):
 
    | Where | Weight |
    |---|---|
@@ -133,9 +157,23 @@ Extraction and scoring are separate: `rank_metrics(PaperContent(...))` and
 tests need no PDFs. LLM tests use a fake `litellm` module (`tests/conftest.py`),
 so they need no network or key.
 
+### Inspecting supporting evidence
+
+`select_metrics(content, use_llm=False).evidence` maps returned names to
+`MetricEvidence` records. Each includes source text, matched wording, section,
+basis, and (for a detected table) page, row, and column. The same mapping is
+available for supported model results. `--verbose` prints this evidence.
+`rank_metrics` / `rank_pdf` also expose unconfirmed candidates for inspection;
+normal `extract_eval_metrics` output filters those candidates out.
+
+Reported-use support includes a reporting statement, a nearby value, a table
+with values, or non-excluded results/caption context. These are language rules,
+not a proof of ownership or correctness. Clause splitting prevents a negation
+about one metric from automatically rejecting a later positive clause.
+
 ## Adding a metric
 
-Append a `MetricSpec` to `METRICS` in `eval_metrics/metrics_dictionary.py`.
+Append a `MetricSpec` to `METRICS` in `metric_matcher/metrics_dictionary.py`.
 Patterns are regexes without word boundaries (added automatically):
 
 - `patterns`: case-insensitive, for full names ("mean squared error").
@@ -176,6 +214,10 @@ they need no network, API key or local model. They also never read your `.env`.
 - Table text also appears in the page text, so table mentions are partly counted twice.
 - Metrics referred to only by symbols or nonstandard names are missed.
 - Words like "precision" or "recall" in a non-metric sense can still slip through despite basic filters.
+- Evidence and relevance checks are heuristic. Unusual negation, attribution,
+  and PDF reading order can cause false positives or false negatives. Results
+  context is an inference of reported use, not a guarantee. Inspect the cited
+  evidence; a live model is still not independently verified by these rules.
 - Section detection is heading-regex based and imperfect; a missed "Related Work" heading means its metrics count.
 
 ### Shared extraction decision

@@ -3,7 +3,7 @@
 import math
 import re
 
-from team.eval_metrics_tool.eval_metrics.matcher import find_metrics, find_requested_metrics, normalize_metric
+from team.eval_metrics_tool.metric_matcher import find_metrics, find_requested_metrics, normalize_metric
 from .evidence import _NUMBER, _Evidence, _context_features, _section_features
 
 _CELL = re.compile(rf'^\s*({_NUMBER})\s*%?(?:\s*(?:±|\+/-)\s*{_NUMBER}\s*%?)?\s*[*†‡]*\s*$')

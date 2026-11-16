@@ -43,8 +43,11 @@ SYSTEM_PROMPT = (
     "whole paper body when it has no such section) and identify "
     "the evaluation metrics the paper itself uses to report its results (e.g. "
     "accuracy, F1, BLEU, demographic parity difference). Ignore metrics that "
-    "are only mentioned when discussing other people's work. Reply with only a "
-    "JSON array of metric names as strings, most important first, using the "
+    "are only mentioned when discussing other people's work. "
+    "Do not list negated or unused metrics, or training-only losses. Keep error "
+    "rates distinct from accuracy, and average precision distinct from mean "
+    "average precision. Use a name supported by a result statement or table. "
+    "Reply with only a JSON array of metric names as strings, most important first, using the "
     "name the paper uses. Reply [] if the section reports no metrics."
 )
 

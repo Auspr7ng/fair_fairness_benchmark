@@ -17,7 +17,7 @@ python -m pip install -r team/eval_metrics_tool/requirements.txt
 ## Python API
 
 ```python
-from team.eval_metrics_tool.eval_metrics import extract_eval_metrics
+from team.eval_metrics_tool.metric_extractor import extract_eval_metrics
 from team.initialize_metrics_record_tool import initialize_metrics_record
 from team.insert_into_record_tool import MetricsRecord
 

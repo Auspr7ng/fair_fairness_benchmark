@@ -1,8 +1,7 @@
 """Model input includes results when available and excludes references otherwise."""
 
-from eval_metrics import experiments_section, llm_text
-from eval_metrics.extraction import PaperContent
-from eval_metrics.sections import split_sections
+from team.eval_metrics_tool.section_selector import experiments_section, llm_text
+from team.eval_metrics_tool.section_splitter import PaperContent, split_sections
 
 
 def test_results_sections_are_selected_instead_of_background_and_references():
@@ -50,7 +49,7 @@ def test_two_column_heading_recovers_experiments_and_excludes_bibliography():
 
 
 def test_heading_recovery_does_not_treat_prose_as_a_heading():
-    from eval_metrics.sections import classify_heading
+    from team.eval_metrics_tool.section_splitter import classify_heading
     assert classify_heading("We discuss 5. Experiments") is None
     assert classify_heading("See references [14] for details") is None
     assert classify_heading("References to earlier experiments are useful.") is None

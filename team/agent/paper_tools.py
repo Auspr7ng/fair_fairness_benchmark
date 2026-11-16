@@ -5,7 +5,9 @@ from pathlib import Path
 
 from langchain_core.tools import tool
 
-from team.eval_metrics_tool.eval_metrics import (PDFReadError, extract_paper, select_metrics)
+from team.eval_metrics_tool.metric_extractor import extract_paper
+from team.eval_metrics_tool.metric_selector import select_metrics
+from team.eval_metrics_tool.pdf_reader import PDFReadError
 
 
 @tool
