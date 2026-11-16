@@ -83,6 +83,8 @@ The code in `ffb/src/`, `ffb/benchmark/`, `ffb/datasets/`, `ffb/tutorial/`, and 
 
 | Nov 16, 2026 | [Poster](poster/main.tex) | Added illustrative onboarding challenges below the bottleneck: experimental context, metric aliases, and PDF layout. |
 
+| Nov 16, 2026 | [Poster layout](poster/main.tex) | Reduced left-column illustration height and spacing to prevent the takeaway from being covered by the footer. |
+
 ## Try the current work
 
 Run the following commands from the repository root. Each component has its own requirements; the data and Ollama model are not included in the repository.

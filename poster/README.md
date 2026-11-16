@@ -98,3 +98,7 @@ Preserved the Landseer system overview and paper-evidence-to-JSON illustration w
 ### Onboarding challenge examples (November 16, 2026)
 
 Filled the left-column space below the bottleneck with three schematic examples: repeated metric names across experiments, naming aliases, and two-column PDF layouts. Each example points to the required interpretation step. No numerical data are invented; the figure is explicitly illustrative. Added a short takeaway about identifying what a reported number measures.
+
+### Footer-clearance correction (November 16, 2026)
+
+Compressed the new challenge illustration vertically while keeping its font sizes, reduced left-column block gaps, and changed the takeaway to one line with tighter padding. This reserves additional clearance above the footer without dropping the three examples or changing the retained figures.
